@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 投资版图研究 · 应用层 + 基建层精选 | 2026 May</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0a0f1c; --panel:#0f1729; --panel2:#141d35; --line:#1d2a47;
+    --ink:#e8eef9; --mute:#86a0c5; --accent:#7db8ff; --gold:#f0b950;
+    --green:#2ecc71; --red:#e74c3c; --amber:#f39c12; --purple:#a991e8;
+    --layer1:#ff6b6b; --layer2:#ff9f43; --layer3:#feca57; --layer4:#48dbfb; --layer5:#a991e8; --layer6:#ff5e8a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .container{max-width:1240px;margin:0 auto;padding:32px 24px}
+
+  header.hero{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:36px;position:relative}
+  header.hero::after{content:"";position:absolute;bottom:-1px;left:0;width:120px;height:3px;background:linear-gradient(90deg,var(--layer1),var(--layer6))}
+  .eyebrow{color:var(--accent);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+  h1{font-size:36px;font-weight:700;margin-top:8px;letter-spacing:-.01em;line-height:1.2}
+  h1 .grad{background:linear-gradient(90deg,var(--layer1),var(--layer3),var(--layer5));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+  .subtitle{color:var(--mute);font-size:15px;margin-top:8px}
+  .rating-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+  .pill{background:var(--panel);border:1px solid var(--line);padding:8px 14px;border-radius:999px;font-size:13px;color:var(--mute)}
+  .pill strong{color:var(--ink);margin-left:6px}
+  .pill.bull{border-color:#1d4a2a;background:#0d1f15}
+  .pill.bull strong{color:var(--green)}
+  .pill.bear{border-color:#4a1d24;background:#1f0d11}
+  .pill.bear strong{color:var(--red)}
+
+  section{margin-bottom:52px}
+  h2{font-size:24px;font-weight:700;margin-bottom:16px;display:flex;align-items:baseline;gap:12px}
+  h2 .num{color:var(--accent);font-family:"SF Mono",monospace;font-size:14px}
+  h3{font-size:17px;font-weight:600;margin:20px 0 10px;color:var(--ink)}
+  p{color:#cdd7e8;margin-bottom:10px;font-size:14.5px}
+  p.lede{font-size:16px;color:var(--ink)}
+  ul{padding-left:22px;margin-bottom:10px}
+  ul li{color:#cdd7e8;margin-bottom:6px;font-size:14.5px}
+  strong{color:var(--ink)}
+  em{color:var(--gold);font-style:normal;font-weight:600}
+
+  /* Stack visual */
+  .stack{display:flex;flex-direction:column;gap:10px;margin:20px 0}
+  .layer{display:grid;grid-template-columns:80px 1fr;gap:18px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;border-left-width:5px;border-left-style:solid;transition:transform .2s}
+  .layer:hover{transform:translateX(4px)}
+  .layer .num-big{font-size:32px;font-weight:800;font-family:"SF Mono",monospace;text-align:center;opacity:0.7}
+  .layer .info{display:flex;flex-direction:column}
+  .layer .info .name{font-size:15px;font-weight:600;color:var(--ink)}
+  .layer .info .desc{font-size:13px;color:var(--mute);margin-top:2px}
+  .layer .info .picks{font-size:12px;color:var(--gold);margin-top:6px;font-family:"SF Mono",monospace;letter-spacing:.05em}
+  .layer.l1{border-left-color:var(--layer1)}
+  .layer.l2{border-left-color:var(--layer2)}
+  .layer.l3{border-left-color:var(--layer3)}
+  .layer.l4{border-left-color:var(--layer4)}
+  .layer.l5{border-left-color:var(--layer5)}
+  .layer.l6{border-left-color:var(--layer6)}
+  .layer.l1 .num-big{color:var(--layer1)}
+  .layer.l2 .num-big{color:var(--layer2)}
+  .layer.l3 .num-big{color:var(--layer3)}
+  .layer.l4 .num-big{color:var(--layer4)}
+  .layer.l5 .num-big{color:var(--layer5)}
+  .layer.l6 .num-big{color:var(--layer6)}
+
+  /* Stock cards */
+  .grid{display:grid;gap:14px}
+  .grid-3{grid-template-columns:repeat(3,1fr)}
+  .grid-2{grid-template-columns:repeat(2,1fr)}
+  @media (max-width:880px){.grid-3,.grid-2{grid-template-columns:1fr}}
+
+  .stock-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;border-top-width:3px;border-top-style:solid;display:flex;flex-direction:column}
+  .stock-card .ticker-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+  .stock-card .ticker-row .ticker{font-family:"SF Mono",monospace;font-size:18px;font-weight:700;color:var(--gold)}
+  .stock-card .ticker-row .price{font-family:"SF Mono",monospace;font-size:14px;color:var(--mute)}
+  .stock-card .name{font-size:13px;color:var(--ink);margin-bottom:8px}
+  .stock-card .thesis{font-size:13.5px;color:#cdd7e8;flex-grow:1}
+  .stock-card .metrics{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);font-size:12px}
+  .stock-card .metrics .m{display:flex;flex-direction:column}
+  .stock-card .metrics .m .lbl{color:var(--mute);font-size:10.5px;text-transform:uppercase;letter-spacing:.05em}
+  .stock-card .metrics .m .val{font-family:"SF Mono",monospace;color:var(--ink);font-size:13px;font-weight:600}
+  .stock-card .verdict{margin-top:12px;padding:8px 10px;border-radius:6px;font-size:12px;text-align:center;font-weight:600;letter-spacing:.05em}
+  .stock-card .verdict.buy{background:rgba(46,204,113,0.12);color:var(--green);border:1px solid rgba(46,204,113,0.3)}
+  .stock-card .verdict.hold{background:rgba(243,156,18,0.12);color:var(--amber);border:1px solid rgba(243,156,18,0.3)}
+  .stock-card .verdict.watch{background:rgba(125,184,255,0.12);color:var(--accent);border:1px solid rgba(125,184,255,0.3)}
+  .stock-card .verdict.expensive{background:rgba(231,76,60,0.12);color:var(--red);border:1px solid rgba(231,76,60,0.3)}
+
+  .stock-card.l1{border-top-color:var(--layer1)}
+  .stock-card.l2{border-top-color:var(--layer2)}
+  .stock-card.l3{border-top-color:var(--layer3)}
+  .stock-card.l4{border-top-color:var(--layer4)}
+  .stock-card.l5{border-top-color:var(--layer5)}
+  .stock-card.l6{border-top-color:var(--layer6)}
+
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:13px}
+  thead{background:var(--panel2)}
+  th{padding:10px 10px;text-align:left;color:var(--mute);font-weight:600;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line)}
+  td{padding:10px;border-bottom:1px solid var(--line);color:#cdd7e8;font-size:13px}
+  tr:last-child td{border-bottom:none}
+  td.num{font-family:"SF Mono",monospace;text-align:right}
+  tr.top-pick{background:rgba(125,184,255,0.07)}
+  tr.top-pick td:first-child{border-left:3px solid var(--accent)}
+  td.pos{color:var(--green)}
+  td.neg{color:var(--red)}
+  td.amber{color:var(--amber)}
+  .score{display:inline-block;width:36px;text-align:center;font-family:"SF Mono",monospace;font-weight:700;padding:3px 0;border-radius:5px;font-size:12px}
+  .score.s9{background:rgba(46,204,113,0.35);color:#fff}
+  .score.s8{background:rgba(46,204,113,0.25);color:var(--green)}
+  .score.s7{background:rgba(243,156,18,0.20);color:var(--amber)}
+  .score.s6{background:rgba(243,156,18,0.12);color:var(--amber)}
+  .score.s5{background:rgba(231,76,60,0.15);color:var(--red)}
+
+  .alert{background:linear-gradient(135deg,#2a1d0a,#0f1729);border:1px solid #5a3a14;border-radius:10px;padding:14px 18px;margin:14px 0;font-size:14px;color:#cdd7e8}
+  .alert strong{color:var(--gold)}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px}
+  .panel-bull{border-left:3px solid var(--green);background:linear-gradient(90deg,#0d1f15,var(--panel))}
+  .panel-bear{border-left:3px solid var(--red);background:linear-gradient(90deg,#1f0d11,var(--panel))}
+
+  .chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;height:380px;position:relative}
+  .chart-title{font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:600}
+
+  .portfolio-card{background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:14px;padding:20px;border-left:4px solid var(--accent)}
+  .portfolio-card .alloc{display:flex;align-items:baseline;gap:10px;margin-top:6px}
+  .portfolio-card .alloc .pct{font-size:24px;font-weight:700;color:var(--accent);font-family:"SF Mono",monospace}
+  .portfolio-card .alloc .lbl{color:var(--mute);font-size:13px}
+
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin-bottom:32px;font-size:13px}
+  .toc strong{color:var(--accent);letter-spacing:.05em}
+  .toc a{color:#cdd7e8;text-decoration:none;margin-right:14px;display:inline-block;padding:2px 0}
+  .toc a:hover{color:var(--gold)}
+
+  footer{border-top:1px solid var(--line);padding-top:24px;margin-top:48px;color:var(--mute);font-size:12.5px}
+  footer a{color:var(--accent);text-decoration:none;display:block;margin:4px 0}
+  footer a:hover{text-decoration:underline}
+  .disclaimer{margin-top:18px;font-size:11.5px;color:#5d738f;font-style:italic}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="hero">
+  <div class="eyebrow">Thematic Research · AI Investment Map</div>
+  <h1>AI 投资版图：<span class="grad">应用层 × 基建层</span><br>S&amp;P / NASDAQ 高信念精选</h1>
+  <p class="subtitle">研究日期 2026-05-06 · 覆盖 18 只标的 · 基于 6 层 AI 价值链框架 · 终极推荐 5 只组合</p>
+  <div class="rating-row">
+    <span class="pill">覆盖范围 <strong>S&amp;P 500 + 部分 NASDAQ</strong></span>
+    <span class="pill bull">行业资本支出 (2026E) <strong>$571B+</strong></span>
+    <span class="pill bear">软件 vs 硬件估值差 <strong>历史极值</strong></span>
+    <span class="pill">投资风格 <strong>长期持有 (3-5年)</strong></span>
+  </div>
+</header>
+
+<div class="toc">
+  <strong>目录 ·</strong>
+  <a href="#overview">市场观察</a>
+  <a href="#framework">6层框架</a>
+  <a href="#layer1">层1 半导体</a>
+  <a href="#layer2">层2 数据中心</a>
+  <a href="#layer3">层3 云</a>
+  <a href="#layer4">层4 数据基建</a>
+  <a href="#layer5">层5 应用层</a>
+  <a href="#layer6">层6 终端 / 平台</a>
+  <a href="#scorecard">综合评分</a>
+  <a href="#portfolio">5名推荐组合</a>
+  <a href="#risks">风险</a>
+</div>
+
+<!-- ============================ 1. Market Overview ============================ -->
+<section id="overview">
+  <h2><span class="num">01</span>当前市场观察：AI 投资正在剧烈分化</h2>
+  <p class="lede">2026 年 AI 投资进入<em>"证明 ROI"</em>阶段。市场不再奖励"AI 主题暴露"，而是要求<strong>可量化的盈利证据</strong>。结果是一个罕见的双向分化：</p>
+
+  <div class="grid grid-2">
+    <div class="panel panel-bull">
+      <h3>硬件 / 物理基建 → 暴涨</h3>
+      <ul>
+        <li>VRT 一年涨 <strong>270%+</strong>，4 月单月 +31%</li>
+        <li>MRVL 一年涨 <strong>165%</strong>，4 月单月 +67%</li>
+        <li>ANET YTD <strong>+33%</strong>，AI 网络业务上调指引</li>
+        <li>NVDA 仍 +73% 收入增长，但 PE 已降到 23x</li>
+        <li>2026 年 4 大科技 capex 计划 <em>$710B</em>（META 自己 $125-145B）</li>
+      </ul>
+    </div>
+    <div class="panel panel-bear">
+      <h3>应用 / 软件 SaaS → 被砍</h3>
+      <ul>
+        <li>NOW (ServiceNow) <strong>-53% YoY</strong>，市值蒸发一半</li>
+        <li>CRM (Salesforce) <strong>-32% YoY</strong>，PE 仅 13.9x</li>
+        <li>SNOW 价位低于卖方共识 66%</li>
+        <li>PwC 调查：<em>56% CEO 表示尚未看到 AI 投资的可量化收益</em></li>
+        <li>"软件死了 / 被 AI 替代"叙事压制估值</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="alert">
+    <strong>核心机会判断</strong>：如果 2027-2028 年企业开始<em>真实部署 AI</em>并产生 ROI，资本将从"挖矿设备"流向"挖出来的金"——即从基建/硬件溢价向应用层流动。当前是<strong>反向布局应用层</strong>的窗口，但要选有真实 AI 货币化路径的赢家（NOW、CRM、META、GOOGL），而不是被颠覆的 incumbents。
+  </div>
+
+  <div class="chart-wrap" style="margin-top:14px">
+    <div class="chart-title">AI 投资分化：基建股 vs 应用股近一年表现</div>
+    <canvas id="divergenceChart"></canvas>
+  </div>
+</section>
+
+<!-- ============================ 2. Framework ============================ -->
+<section id="framework">
+  <h2><span class="num">02</span>AI 价值链 6 层框架</h2>
+  <p>从晶圆到终端用户，AI 价值链可以分成 6 层。每层经济学不同（毛利、护城河、增长可持续性），所以投资逻辑不能"一视同仁"。</p>
+
+  <div class="stack">
+    <a href="#layer6" style="text-decoration:none">
+      <div class="layer l6">
+        <div class="num-big">L6</div>
+        <div class="info">
+          <div class="name">终端 / 平台 (Consumer & Big Tech)</div>
+          <div class="desc">AI 嵌入消费产品 (搜索、广告、设备)，最大规模用户和数据</div>
+          <div class="picks">→ GOOGL · META · AAPL</div>
+        </div>
+      </div>
+    </a>
+    <a href="#layer5" style="text-decoration:none">
+      <div class="layer l5">
+        <div class="num-big">L5</div>
+        <div class="info">
+          <div class="name">应用层 (Vertical SaaS w/ AI)</div>
+          <div class="desc">企业软件嵌入 AI agents，重塑 workflow（CRM, ITSM, dev tools）</div>
+          <div class="picks">→ NOW · CRM · ADBE · CRWD · PLTR</div>
+        </div>
+      </div>
+    </a>
+    <a href="#layer4" style="text-decoration:none">
+      <div class="layer l4">
+        <div class="num-big">L4</div>
+        <div class="info">
+          <div class="name">数据 & 模型基建 (Data infra + observability)</div>
+          <div class="desc">企业数据准备、AI 应用监控、向量数据库、推理边缘</div>
+          <div class="picks">→ SNOW · DDOG · NET · MDB</div>
+        </div>
+      </div>
+    </a>
+    <a href="#layer3" style="text-decoration:none">
+      <div class="layer l3">
+        <div class="num-big">L3</div>
+        <div class="info">
+          <div class="name">云计算 + 模型层 (Hyperscalers)</div>
+          <div class="desc">提供 GPU 算力 + 自研基础模型 + API 服务</div>
+          <div class="picks">→ MSFT · GOOGL · AMZN · ORCL</div>
+        </div>
+      </div>
+    </a>
+    <a href="#layer2" style="text-decoration:none">
+      <div class="layer l2">
+        <div class="num-big">L2</div>
+        <div class="info">
+          <div class="name">数据中心物理基建 (Power, Cooling, Networking)</div>
+          <div class="desc">电源、散热、机架、高速网络——hyperscaler capex 直接受益</div>
+          <div class="picks">→ VRT · ANET · ETN · GE Vernova</div>
+        </div>
+      </div>
+    </a>
+    <a href="#layer1" style="text-decoration:none">
+      <div class="layer l1">
+        <div class="num-big">L1</div>
+        <div class="info">
+          <div class="name">半导体 / 硬件 (Chips, Memory, Foundry)</div>
+          <div class="desc">GPU、CPU、ASIC、HBM、晶圆代工——AI 算力的物质基础</div>
+          <div class="picks">→ NVDA · AVGO · AMD · TSM · MRVL</div>
+        </div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- ============================ 3. Layer 1: 半导体 ============================ -->
+<section id="layer1">
+  <h2><span class="num">03</span>层 1：半导体 / 硬件</h2>
+  <p>2026 年 AI capex $571B 中，最直接受益的就是这一层。但内部分化巨大：通用 GPU 王者 (NVDA) vs 定制 ASIC 玩家 (AVGO/MRVL) vs 代工 (TSM) vs 落后者 (AMD/INTC)。</p>
+
+  <div class="grid grid-3">
+    <div class="stock-card l1">
+      <div class="ticker-row"><span class="ticker">NVDA</span><span class="price">PE 23.8x</span></div>
+      <div class="name">Nvidia · AI 算力王者</div>
+      <div class="thesis">+73% YoY 收入仍在增长，但 PE 已从 60x 跌到 23x——市场已 price-in 部分降速。Blackwell + Rubin 路线图明确，CUDA 软件生态护城河无人能复制。<em>真正的风险</em>：客户集中（hyperscalers 占 ~50%），如果 META/MSFT/GOOGL 任一 capex 减少，DCF 即受冲击。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">EV/EBITDA</span><span class="val">36x</span></div>
+        <div class="m"><span class="lbl">Rev Growth</span><span class="val">+73%</span></div>
+        <div class="m"><span class="lbl">FCF Margin</span><span class="val">~50%</span></div>
+        <div class="m"><span class="lbl">Mkt Cap</span><span class="val">~$3.5T</span></div>
+      </div>
+      <div class="verdict buy">CORE BUY · 核心持仓</div>
+    </div>
+
+    <div class="stock-card l1">
+      <div class="ticker-row"><span class="ticker">AVGO</span><span class="price">大盘股</span></div>
+      <div class="name">Broadcom · 定制 AI 芯片 + 网络</div>
+      <div class="thesis">为 GOOGL TPU、META、其他 hyperscaler 设计定制 AI ASIC——是"非 NVDA 路线"的最大赢家。VMware 软件业务提供高利润现金流。比 NVDA 客户更分散、估值更合理。<em>thesis</em>：定制硅片越来越多，AVGO 是结构性赢家。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">FY26E PE</span><span class="val">~33x</span></div>
+        <div class="m"><span class="lbl">AI Rev</span><span class="val">~$15B run-rate</span></div>
+        <div class="m"><span class="lbl">FCF Margin</span><span class="val">~45%</span></div>
+        <div class="m"><span class="lbl">股息</span><span class="val">~1.2%</span></div>
+      </div>
+      <div class="verdict buy">CORE BUY · 互补 NVDA</div>
+    </div>
+
+    <div class="stock-card l1">
+      <div class="ticker-row"><span class="ticker">MRVL</span><span class="price">$171 · PE 53x</span></div>
+      <div class="name">Marvell · 定制 ASIC 后起之秀</div>
+      <div class="thesis">2026 年 4 月单月 +67%（年涨 165%）——定制 ASIC 设计赢量产化突破。AWS Trainium 合作 + 新增大客户 + Nvidia 战略投资 $2B。<em>但</em>已 priced for perfection；任何执行失误都会大跌。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">PE</span><span class="val">53x</span></div>
+        <div class="m"><span class="lbl">YoY 涨幅</span><span class="val pos">+165%</span></div>
+        <div class="m"><span class="lbl">Mkt Cap</span><span class="val">$148B</span></div>
+        <div class="m"><span class="lbl">下一财报</span><span class="val">5/27</span></div>
+      </div>
+      <div class="verdict watch">WATCH · 等回调</div>
+    </div>
+
+    <div class="stock-card l1">
+      <div class="ticker-row"><span class="ticker">TSM</span><span class="price">ADR</span></div>
+      <div class="name">TSMC · 代工厂垄断</div>
+      <div class="thesis">所有 AI 芯片（NVDA, AVGO, AMD, AAPL, MRVL）都依赖 TSMC 制造。3nm/2nm 工艺独家。地缘政治风险高（台海），但市场已部分定价。低 PE + 全球先进制程垄断 = 经典的"低估的卖铲子"。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">PE</span><span class="val">~21x</span></div>
+        <div class="m"><span class="lbl">Rev Growth</span><span class="val">+30%+</span></div>
+        <div class="m"><span class="lbl">Gross Margin</span><span class="val">~57%</span></div>
+        <div class="m"><span class="lbl">Mkt Cap</span><span class="val">~$1T</span></div>
+      </div>
+      <div class="verdict buy">BUY · 估值最合理的卖铲子</div>
+    </div>
+
+    <div class="stock-card l1">
+      <div class="ticker-row"><span class="ticker">AMD</span><span class="price">runner-up</span></div>
+      <div class="name">AMD · GPU 第二名</div>
+      <div class="thesis">MI300/MI350 系列与 NVDA 差距缩小，但生态系统（ROCm vs CUDA）仍是结构性弱势。在 inference 市场可能胜出（成本敏感）；training 市场难撼动。<em>"NVDA 的 hedge"，不是首选</em>。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">PE</span><span class="val">~38x</span></div>
+        <div class="m"><span class="lbl">Rev Growth</span><span class="val">+25%</span></div>
+        <div class="m"><span class="lbl">FCF Margin</span><span class="val">~25%</span></div>
+        <div class="m"><span class="lbl">Mkt Cap</span><span class="val">~$280B</span></div>
+      </div>
+      <div class="verdict hold">HOLD · 不是首选</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 4. Layer 2: 数据中心 ============================ -->
+<section id="layer2">
+  <h2><span class="num">04</span>层 2：数据中心物理基建</h2>
+  <p>每一台 GPU 服务器需要 ~10-20 kW 电力 + 散热——这层是 hyperscaler capex 的<em>线性受益者</em>。它们不必押注哪家 AI 模型胜出，只要 GPU 数量增长就赢。</p>
+
+  <div class="grid grid-3">
+    <div class="stock-card l2">
+      <div class="ticker-row"><span class="ticker">VRT</span><span class="price">$328</span></div>
+      <div class="name">Vertiv · 数据中心电源 + 散热</div>
+      <div class="thesis">FY26 收入 guide $13.75B (+34%)，EPS $6.30-6.40。一年涨 270%——但 forward PE ~52x 仍合理（增速给的）。<em>AI capex 周期内最纯的受益者</em>，不依赖任何特定芯片或模型。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">FY26 Rev</span><span class="val">$13.75B</span></div>
+        <div class="m"><span class="lbl">YoY 涨幅</span><span class="val pos">+270%</span></div>
+        <div class="m"><span class="lbl">FY26 EPS</span><span class="val">$6.30-6.40</span></div>
+        <div class="m"><span class="lbl">Forward PE</span><span class="val">~52x</span></div>
+      </div>
+      <div class="verdict watch">WATCH · 等回调</div>
+    </div>
+
+    <div class="stock-card l2">
+      <div class="ticker-row"><span class="ticker">ANET</span><span class="price">YTD +33%</span></div>
+      <div class="name">Arista Networks · AI 网络</div>
+      <div class="thesis">高速 Ethernet 交换机龙头，META/MSFT 主要供应商。FY25 收入 $9B (+29%)。FY26 AI 网络收入指引<strong>从 $2.75B 上调到 $3.25B</strong>——量产爬坡确定性强。<em>thesis</em>：AI 数据中心带宽需求每年翻倍，ANET 是软件定义网络的赢家。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">PE</span><span class="val">~37x</span></div>
+        <div class="m"><span class="lbl">FY25 Rev</span><span class="val">$9B (+29%)</span></div>
+        <div class="m"><span class="lbl">FY26 AI Net</span><span class="val">$3.25B</span></div>
+        <div class="m"><span class="lbl">FCF Margin</span><span class="val">~40%</span></div>
+      </div>
+      <div class="verdict buy">BUY · 第二选择</div>
+    </div>
+
+    <div class="stock-card l2">
+      <div class="ticker-row"><span class="ticker">ETN</span><span class="price">大盘股</span></div>
+      <div class="name">Eaton · 电力管理</div>
+      <div class="thesis">数据中心从 ~30 kW/机架升到 100-150 kW，电气分发系统全面升级——ETN 是受益者。比 VRT 更"老牌工业"，估值更便宜（PE ~28x）。AI capex + 电网升级 + 制造业回流三重 tailwind。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">PE</span><span class="val">~28x</span></div>
+        <div class="m"><span class="lbl">Rev Growth</span><span class="val">+10%</span></div>
+        <div class="m"><span class="lbl">EPS Growth</span><span class="val">+15%</span></div>
+        <div class="m"><span class="lbl">Dividend</span><span class="val">~1.3%</span></div>
+      </div>
+      <div class="verdict buy">BUY · 性价比之选</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 5. Layer 3: 云 + 模型 ============================ -->
+<section id="layer3">
+  <h2><span class="num">05</span>层 3：Hyperscalers (云 + 自研模型)</h2>
+  <p>这层"自己花钱建数据中心 + 自己开发模型 + 自己提供 API"——是 AI 价值链中最厚的一层。Q1 2026 财报后<em>分化加剧</em>：GOOGL 投资者已被说服，MSFT 仍受质疑，META 因 capex 飙升被砍。</p>
+
+  <div class="grid grid-3">
+    <div class="stock-card l3">
+      <div class="ticker-row"><span class="ticker">GOOGL</span><span class="price">PE 29x</span></div>
+      <div class="name">Alphabet · Gemini 3 + GCP 双引擎</div>
+      <div class="thesis"><em>2026 年最被低估的 hyperscaler</em>。GCP +63% YoY 到 $20B（背单超 $460B）；Gemini 3 让 AI 查询成本降 78%；AI Overviews 让搜索收入 +17%；Gemini App 月活 7.5亿+。<strong>关键</strong>：Gemini 3 证明垂直整合（自研芯片 TPU + 自研模型）= 成本优势。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">Forward PE</span><span class="val">29x</span></div>
+        <div class="m"><span class="lbl">GCP Growth</span><span class="val pos">+63%</span></div>
+        <div class="m"><span class="lbl">Gemini MAU</span><span class="val">750M+</span></div>
+        <div class="m"><span class="lbl">Mkt Cap</span><span class="val">~$2.4T</span></div>
+      </div>
+      <div class="verdict buy">TOP PICK · 强烈推荐</div>
+    </div>
+
+    <div class="stock-card l3">
+      <div class="ticker-row"><span class="ticker">MSFT</span><span class="price">承压中</span></div>
+      <div class="name">Microsoft · OpenAI + Copilot 全家桶</div>
+      <div class="thesis">Azure AI 服务增速超核心云，但<em>整体被认为效率低于 GOOGL/META</em>。Copilot 渗透率仍未证明商业化。OpenAI 关系复杂化（OpenAI 已与 Oracle/Google 也合作）。<strong>thesis 仍在但贵</strong>——核心问题是"$30B+ AI 投入到底带来多少高利润收入"。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">Forward PE</span><span class="val">~32x</span></div>
+        <div class="m"><span class="lbl">Azure Growth</span><span class="val">~30%</span></div>
+        <div class="m"><span class="lbl">FCF Margin</span><span class="val">~32%</span></div>
+        <div class="m"><span class="lbl">Mkt Cap</span><span class="val">~$3.2T</span></div>
+      </div>
+      <div class="verdict hold">HOLD · 等 ROI 证明</div>
+    </div>
+
+    <div class="stock-card l3">
+      <div class="ticker-row"><span class="ticker">AMZN</span><span class="price">大盘股</span></div>
+      <div class="name">Amazon · AWS + Bedrock + Anthropic</div>
+      <div class="thesis">AWS 是云老大但增速被 Azure/GCP 超越。投资 Anthropic（$8B+）是聪明的对冲。Trainium 自研芯片提供成本结构优势。<em>但 retail/AWS 业绩组合让 thesis 不纯</em>——更像价值股而非 AI 纯标的。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">Forward PE</span><span class="val">~37x</span></div>
+        <div class="m"><span class="lbl">AWS Growth</span><span class="val">~19%</span></div>
+        <div class="m"><span class="lbl">FCF Margin</span><span class="val">~10%</span></div>
+        <div class="m"><span class="lbl">Mkt Cap</span><span class="val">~$2T</span></div>
+      </div>
+      <div class="verdict hold">HOLD · 不纯 AI 标的</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 6. Layer 4: 数据基建 ============================ -->
+<section id="layer4">
+  <h2><span class="num">06</span>层 4：数据 & 模型基建</h2>
+  <p>AI 应用要规模化，必须解决：(1) 企业数据准备 (SNOW)、(2) 模型监控/可观测性 (DDOG)、(3) 推理时延优化 (NET)。这层是<em>"AI 时代的中间件"</em>。</p>
+
+  <div class="grid grid-3">
+    <div class="stock-card l4">
+      <div class="ticker-row"><span class="ticker">SNOW</span><span class="price">$140</span></div>
+      <div class="name">Snowflake · 数据云 + Cortex AI</div>
+      <div class="thesis">Q4 FY26 产品收入 reaccel 到 +30%；RPO $9.77B (+42%)；首签 $400M 大客户。Cortex（让客户在数据上跑 LLM）开始货币化。<em>卖方共识 PT $232 = +66% upside</em>。当前 EV/Sales ~10x，相对增速合理。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">EV/Sales</span><span class="val">~10x</span></div>
+        <div class="m"><span class="lbl">Product Growth</span><span class="val pos">+30%</span></div>
+        <div class="m"><span class="lbl">RPO</span><span class="val">$9.77B</span></div>
+        <div class="m"><span class="lbl">FCF Margin</span><span class="val">24%</span></div>
+      </div>
+      <div class="verdict buy">BUY · 反向 AI 应用层</div>
+    </div>
+
+    <div class="stock-card l4">
+      <div class="ticker-row"><span class="ticker">DDOG</span><span class="price">EV/Sales 11x</span></div>
+      <div class="name">Datadog · 可观测性 + AI</div>
+      <div class="thesis">650 AI-native 客户（含 19/20 顶级 AI 公司），是 "AI agents 监控" 的标准选项。FY25 收入 +27.7% 到 $3.43B；FCF margin 26.7%（最高）；毛利率 81%。Benchmark 初始覆盖 Buy，PT $150。<em>"agentic AI 浪潮的卖铲人"</em>。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">EV/Sales</span><span class="val">11.4x</span></div>
+        <div class="m"><span class="lbl">Rev Growth</span><span class="val pos">+27.7%</span></div>
+        <div class="m"><span class="lbl">FCF Margin</span><span class="val pos">26.7%</span></div>
+        <div class="m"><span class="lbl">Gross Margin</span><span class="val">81%</span></div>
+      </div>
+      <div class="verdict buy">BUY · 数据基建首选</div>
+    </div>
+
+    <div class="stock-card l4">
+      <div class="ticker-row"><span class="ticker">NET</span><span class="price">中盘</span></div>
+      <div class="name">Cloudflare · 推理边缘网络</div>
+      <div class="thesis">Workers AI 让小模型在边缘节点推理——延迟 + 成本优势。CDN/安全是现金奶牛业务，AI 是增长期权。EV/Sales ~16x 偏贵；增速 +25-30%。<em>更适合作为小仓位的成长 option</em>。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">EV/Sales</span><span class="val">~16x</span></div>
+        <div class="m"><span class="lbl">Rev Growth</span><span class="val">+28%</span></div>
+        <div class="m"><span class="lbl">FCF Margin</span><span class="val">~12%</span></div>
+        <div class="m"><span class="lbl">GAAP</span><span class="val">亏损</span></div>
+      </div>
+      <div class="verdict watch">WATCH · 偏贵</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 7. Layer 5: 应用层 ============================ -->
+<section id="layer5">
+  <h2><span class="num">07</span>层 5：应用层 (Vertical SaaS w/ AI)</h2>
+  <p><em>这是当前最 contrarian 的机会</em>。市场担心"SaaS 被 LLM 颠覆"，所以全面砍仓。但真正的赢家是<strong>已有 workflow + 数据</strong>的玩家——AI 是它们的提效工具，不是替代它们。</p>
+
+  <div class="alert"><strong>反向逻辑</strong>：CRM、NOW 等核心 SaaS 跌到多年低位 PE，但实际 AI 模块（Agentforce, Now Assist）正在产生真实 ARR。如果 H2 2026 / 2027 数据证明 AI 货币化，估值修复弹性最大。</div>
+
+  <div class="grid grid-3">
+    <div class="stock-card l5">
+      <div class="ticker-row"><span class="ticker">NOW</span><span class="price">PE 21x</span></div>
+      <div class="name">ServiceNow · Now Assist (AI)</div>
+      <div class="thesis">YoY 跌 53%（!）但增速仍 +21%。Now Assist 已达 <em>$1B 年化合同价值</em>——这是企业 AI 货币化最成功的案例之一。<strong>EV/EBITDA 31x · Forward PE 21x</strong>——历史最低估值。<em>这是经典的"质量贵、估值便宜"的反向机会</em>。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">Forward PE</span><span class="val">21.2x</span></div>
+        <div class="m"><span class="lbl">YoY 跌幅</span><span class="val neg">-53%</span></div>
+        <div class="m"><span class="lbl">Rev Growth</span><span class="val pos">+21%</span></div>
+        <div class="m"><span class="lbl">Now Assist ACV</span><span class="val">$1B</span></div>
+      </div>
+      <div class="verdict buy">TOP CONTRARIAN BUY</div>
+    </div>
+
+    <div class="stock-card l5">
+      <div class="ticker-row"><span class="ticker">CRM</span><span class="price">PE 13.9x</span></div>
+      <div class="name">Salesforce · Agentforce</div>
+      <div class="thesis">YoY -32%，PE <em>13.9x</em>——比标普平均还便宜。Agentforce（AI agents）货币化进度慢于 NOW；增速仅 +9.6%。<strong>但</strong>下行已被深度 price-in，FCF yield ~6%，回购 + 派息 + AI option = 极佳 risk/reward。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">Forward PE</span><span class="val">13.9x</span></div>
+        <div class="m"><span class="lbl">YoY 跌幅</span><span class="val neg">-32%</span></div>
+        <div class="m"><span class="lbl">Rev Growth</span><span class="val">+9.6%</span></div>
+        <div class="m"><span class="lbl">EV/EBITDA</span><span class="val">12.8x</span></div>
+      </div>
+      <div class="verdict buy">DEEP VALUE BUY</div>
+    </div>
+
+    <div class="stock-card l5">
+      <div class="ticker-row"><span class="ticker">PLTR</span><span class="price">$146 · PE 111x</span></div>
+      <div class="name">Palantir · AIP 政府 + 商业</div>
+      <div class="thesis">护城河独特（数据本体论 + 政府关系），AIP 在美国商业市场快速规模化。<em>但 forward PE 111x 是软件行业 6 倍</em>——已 priced for absolute perfection。任何执行失误 = 大跌。<em>等回调到 $90-100 区间再考虑</em>。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">Forward PE</span><span class="val neg">111x</span></div>
+        <div class="m"><span class="lbl">Rev Growth</span><span class="val pos">+30%+</span></div>
+        <div class="m"><span class="lbl">FCF Margin</span><span class="val">~40%</span></div>
+        <div class="m"><span class="lbl">GF Value</span><span class="val">$63 (overvalued)</span></div>
+      </div>
+      <div class="verdict expensive">EXPENSIVE · 等回调</div>
+    </div>
+
+    <div class="stock-card l5">
+      <div class="ticker-row"><span class="ticker">ADBE</span><span class="price">中盘</span></div>
+      <div class="name">Adobe · Firefly + Creative Cloud</div>
+      <div class="thesis">Firefly (生成式) 集成到 Creative Cloud——存量用户付费意愿测试中。被 Midjourney/OpenAI 蚕食叙事压制估值。Forward PE 17x——便宜。<em>关键看是否能保住创意工作流的"最后一公里"</em>。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">Forward PE</span><span class="val">~17x</span></div>
+        <div class="m"><span class="lbl">Rev Growth</span><span class="val">+10%</span></div>
+        <div class="m"><span class="lbl">FCF Margin</span><span class="val">~38%</span></div>
+        <div class="m"><span class="lbl">YoY</span><span class="val neg">-30%</span></div>
+      </div>
+      <div class="verdict watch">WATCH · 待验证</div>
+    </div>
+
+    <div class="stock-card l5">
+      <div class="ticker-row"><span class="ticker">CRWD</span><span class="price">中盘</span></div>
+      <div class="name">CrowdStrike · 安全 AI</div>
+      <div class="thesis">网络安全 + AI 是少数"客户必须买单"的应用。Falcon AI 在威胁检测上的差异显著。<em>但 PE ~75x</em>——增长溢价已充分定价。竞争 (S, ZS) 加剧。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">Forward PE</span><span class="val">~75x</span></div>
+        <div class="m"><span class="lbl">Rev Growth</span><span class="val">+25%</span></div>
+        <div class="m"><span class="lbl">FCF Margin</span><span class="val">~33%</span></div>
+        <div class="m"><span class="lbl">GAAP</span><span class="val">盈利</span></div>
+      </div>
+      <div class="verdict hold">HOLD · 估值已满</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 8. Layer 6: 终端 / 平台 ============================ -->
+<section id="layer6">
+  <h2><span class="num">08</span>层 6：终端 / 平台 (Consumer + Big Tech)</h2>
+  <p>这一层最大优势：<em>已经有数十亿用户和数据</em>，AI 是"现有产品的提效器"。它们不需要发明新的客户关系，只需要把 AI 嵌进去就有变现路径。</p>
+
+  <div class="grid grid-3">
+    <div class="stock-card l6">
+      <div class="ticker-row"><span class="ticker">META</span><span class="price">PE 21-24x</span></div>
+      <div class="name">Meta · AI 广告精准化 + Llama</div>
+      <div class="thesis">Q1 +33% 收入（最快增速 since 2021）；Advantage+（AI 优化广告）已是<em>已证明的 ROI 故事</em>。Llama 5 开源是战略防御。<strong>但</strong>FY26 capex 飙到 $125-145B（vs $72B FY25）——市场担心"军备竞赛"。Forward PE 21x = 便宜。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">Forward PE</span><span class="val">21-24x</span></div>
+        <div class="m"><span class="lbl">Rev Growth</span><span class="val pos">+33%</span></div>
+        <div class="m"><span class="lbl">Operating Margin</span><span class="val">~40%</span></div>
+        <div class="m"><span class="lbl">Capex 2026</span><span class="val neg">$125-145B</span></div>
+      </div>
+      <div class="verdict buy">TOP PICK · 高增长 + 便宜</div>
+    </div>
+
+    <div class="stock-card l6">
+      <div class="ticker-row"><span class="ticker">AAPL</span><span class="price">大盘股</span></div>
+      <div class="name">Apple · Apple Intelligence</div>
+      <div class="thesis">硬件分发渠道 + 端侧 AI 隐私优势独一无二。Apple Intelligence 落地缓慢，Siri 升级延后。<em>"AI 落后者"叙事压制估值</em>，但 18 亿活跃 iPhone = 终极推广通道。Forward PE 27x——溢价仍在但合理。</div>
+      <div class="metrics">
+        <div class="m"><span class="lbl">Forward PE</span><span class="val">~27x</span></div>
+        <div class="m"><span class="lbl">Rev Growth</span><span class="val">+5-8%</span></div>
+        <div class="m"><span class="lbl">FCF Margin</span><span class="val">~28%</span></div>
+        <div class="m"><span class="lbl">Buyback</span><span class="val">$100B+</span></div>
+      </div>
+      <div class="verdict hold">HOLD · 待 AI 故事</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 9. Scorecard ============================ -->
+<section id="scorecard">
+  <h2><span class="num">09</span>综合评分卡（18 只标的）</h2>
+  <p>从 5 个维度打分（每项 1-10）：<strong>AI 暴露</strong>（直接 vs 间接）· <strong>护城河</strong>· <strong>估值吸引力</strong>· <strong>FCF 质量</strong>· <strong>催化剂可见度</strong>。综合分 = 简单平均。</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>层</th><th>Ticker</th><th>名称</th>
+        <th>AI 暴露</th><th>护城河</th><th>估值</th><th>FCF</th><th>催化</th>
+        <th>综合</th><th>建议</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="top-pick">
+        <td style="color:var(--layer3)">L3</td><td><strong>GOOGL</strong></td><td>Alphabet</td>
+        <td><span class="score s9">9</span></td><td><span class="score s9">9</span></td>
+        <td><span class="score s8">8</span></td><td><span class="score s9">9</span></td>
+        <td><span class="score s8">8</span></td>
+        <td><span class="score s9">8.6</span></td>
+        <td class="pos"><strong>TOP PICK</strong></td>
+      </tr>
+      <tr class="top-pick">
+        <td style="color:var(--layer6)">L6</td><td><strong>META</strong></td><td>Meta Platforms</td>
+        <td><span class="score s8">8</span></td><td><span class="score s9">9</span></td>
+        <td><span class="score s9">9</span></td><td><span class="score s9">9</span></td>
+        <td><span class="score s8">8</span></td>
+        <td><span class="score s9">8.6</span></td>
+        <td class="pos"><strong>TOP PICK</strong></td>
+      </tr>
+      <tr class="top-pick">
+        <td style="color:var(--layer1)">L1</td><td><strong>AVGO</strong></td><td>Broadcom</td>
+        <td><span class="score s9">9</span></td><td><span class="score s8">8</span></td>
+        <td><span class="score s7">7</span></td><td><span class="score s9">9</span></td>
+        <td><span class="score s9">9</span></td>
+        <td><span class="score s8">8.4</span></td>
+        <td class="pos"><strong>TOP PICK</strong></td>
+      </tr>
+      <tr class="top-pick">
+        <td style="color:var(--layer5)">L5</td><td><strong>NOW</strong></td><td>ServiceNow</td>
+        <td><span class="score s8">8</span></td><td><span class="score s9">9</span></td>
+        <td><span class="score s9">9</span></td><td><span class="score s8">8</span></td>
+        <td><span class="score s7">7</span></td>
+        <td><span class="score s8">8.2</span></td>
+        <td class="pos"><strong>CONTRARIAN</strong></td>
+      </tr>
+      <tr>
+        <td style="color:var(--layer1)">L1</td><td>NVDA</td><td>Nvidia</td>
+        <td><span class="score s9">10</span></td><td><span class="score s9">9</span></td>
+        <td><span class="score s7">7</span></td><td><span class="score s9">9</span></td>
+        <td><span class="score s7">7</span></td>
+        <td><span class="score s8">8.4</span></td>
+        <td>CORE</td>
+      </tr>
+      <tr>
+        <td style="color:var(--layer4)">L4</td><td>DDOG</td><td>Datadog</td>
+        <td><span class="score s8">8</span></td><td><span class="score s8">8</span></td>
+        <td><span class="score s7">7</span></td><td><span class="score s9">9</span></td>
+        <td><span class="score s8">8</span></td>
+        <td><span class="score s8">8.0</span></td>
+        <td>BUY</td>
+      </tr>
+      <tr>
+        <td style="color:var(--layer2)">L2</td><td>VRT</td><td>Vertiv</td>
+        <td><span class="score s9">9</span></td><td><span class="score s7">7</span></td>
+        <td><span class="score s6">6</span></td><td><span class="score s8">8</span></td>
+        <td><span class="score s9">9</span></td>
+        <td><span class="score s8">7.8</span></td>
+        <td>WATCH</td>
+      </tr>
+      <tr>
+        <td style="color:var(--layer1)">L1</td><td>TSM</td><td>TSMC</td>
+        <td><span class="score s9">9</span></td><td><span class="score s9">10</span></td>
+        <td><span class="score s8">8</span></td><td><span class="score s8">8</span></td>
+        <td><span class="score s5">5</span></td>
+        <td><span class="score s8">8.0</span></td>
+        <td>BUY</td>
+      </tr>
+      <tr>
+        <td style="color:var(--layer4)">L4</td><td>SNOW</td><td>Snowflake</td>
+        <td><span class="score s8">8</span></td><td><span class="score s8">8</span></td>
+        <td><span class="score s7">7</span></td><td><span class="score s7">7</span></td>
+        <td><span class="score s8">8</span></td>
+        <td><span class="score s8">7.6</span></td>
+        <td>BUY</td>
+      </tr>
+      <tr>
+        <td style="color:var(--layer3)">L3</td><td>MSFT</td><td>Microsoft</td>
+        <td><span class="score s8">8</span></td><td><span class="score s9">10</span></td>
+        <td><span class="score s5">5</span></td><td><span class="score s8">8</span></td>
+        <td><span class="score s6">6</span></td>
+        <td><span class="score s7">7.4</span></td>
+        <td>HOLD</td>
+      </tr>
+      <tr>
+        <td style="color:var(--layer5)">L5</td><td>CRM</td><td>Salesforce</td>
+        <td><span class="score s7">7</span></td><td><span class="score s8">8</span></td>
+        <td><span class="score s9">10</span></td><td><span class="score s8">8</span></td>
+        <td><span class="score s5">5</span></td>
+        <td><span class="score s8">7.6</span></td>
+        <td>VALUE BUY</td>
+      </tr>
+      <tr>
+        <td style="color:var(--layer2)">L2</td><td>ANET</td><td>Arista</td>
+        <td><span class="score s8">8</span></td><td><span class="score s8">8</span></td>
+        <td><span class="score s6">6</span></td><td><span class="score s8">8</span></td>
+        <td><span class="score s8">8</span></td>
+        <td><span class="score s8">7.6</span></td>
+        <td>BUY</td>
+      </tr>
+      <tr>
+        <td style="color:var(--layer3)">L3</td><td>AMZN</td><td>Amazon</td>
+        <td><span class="score s7">7</span></td><td><span class="score s9">9</span></td>
+        <td><span class="score s6">6</span></td><td><span class="score s7">7</span></td>
+        <td><span class="score s7">7</span></td>
+        <td><span class="score s7">7.2</span></td>
+        <td>HOLD</td>
+      </tr>
+      <tr>
+        <td style="color:var(--layer1)">L1</td><td>MRVL</td><td>Marvell</td>
+        <td><span class="score s9">9</span></td><td><span class="score s7">7</span></td>
+        <td><span class="score s5">5</span></td><td><span class="score s7">7</span></td>
+        <td><span class="score s8">8</span></td>
+        <td><span class="score s7">7.2</span></td>
+        <td>WATCH</td>
+      </tr>
+      <tr>
+        <td style="color:var(--layer2)">L2</td><td>ETN</td><td>Eaton</td>
+        <td><span class="score s7">7</span></td><td><span class="score s7">7</span></td>
+        <td><span class="score s7">7</span></td><td><span class="score s8">8</span></td>
+        <td><span class="score s7">7</span></td>
+        <td><span class="score s7">7.2</span></td>
+        <td>BUY</td>
+      </tr>
+      <tr>
+        <td style="color:var(--layer6)">L6</td><td>AAPL</td><td>Apple</td>
+        <td><span class="score s6">6</span></td><td><span class="score s9">10</span></td>
+        <td><span class="score s6">6</span></td><td><span class="score s9">9</span></td>
+        <td><span class="score s5">5</span></td>
+        <td><span class="score s7">7.2</span></td>
+        <td>HOLD</td>
+      </tr>
+      <tr>
+        <td style="color:var(--layer5)">L5</td><td>PLTR</td><td>Palantir</td>
+        <td><span class="score s9">10</span></td><td><span class="score s8">8</span></td>
+        <td><span class="score s5">3</span></td><td><span class="score s8">8</span></td>
+        <td><span class="score s7">7</span></td>
+        <td><span class="score s7">7.2</span></td>
+        <td class="amber">EXPENSIVE</td>
+      </tr>
+      <tr>
+        <td style="color:var(--layer1)">L1</td><td>AMD</td><td>AMD</td>
+        <td><span class="score s7">7</span></td><td><span class="score s6">6</span></td>
+        <td><span class="score s6">6</span></td><td><span class="score s6">6</span></td>
+        <td><span class="score s6">6</span></td>
+        <td><span class="score s6">6.2</span></td>
+        <td class="amber">HOLD</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="chart-wrap" style="margin-top:14px">
+    <div class="chart-title">综合评分 vs 预期回报（气泡大小 = 市值）</div>
+    <canvas id="scoreChart"></canvas>
+  </div>
+</section>
+
+<!-- ============================ 10. Top 5 Portfolio ============================ -->
+<section id="portfolio">
+  <h2><span class="num">10</span>终极推荐：5 名 AI 投资组合</h2>
+  <p class="lede">基于你的 profile（长期持有 + 月增 &lt; 3 标的 + 完整 teardown 偏好），我精选 5 名构建一个<em>"覆盖 AI 价值链 + 风险互补"</em>的核心组合。</p>
+
+  <div class="grid grid-3" style="margin-top:14px">
+
+    <div class="portfolio-card">
+      <div style="color:var(--layer3);font-size:11px;letter-spacing:.1em;font-weight:700">LAYER 3 · 云 / 模型</div>
+      <h3 style="margin:6px 0">GOOGL · 最被低估的 hyperscaler</h3>
+      <div class="alloc"><span class="pct">25%</span><span class="lbl">建议占组合比重</span></div>
+      <ul style="margin-top:10px">
+        <li>Gemini 3 已证明垂直整合的成本优势（AI 查询成本 -78%）</li>
+        <li>GCP +63% YoY，背单 $460B</li>
+        <li>Forward PE 29x（vs 历史均值 25x）——溢价合理</li>
+        <li>Search 仍是金融印钞机，AI Overviews +17% 收入</li>
+      </ul>
+    </div>
+
+    <div class="portfolio-card">
+      <div style="color:var(--layer6);font-size:11px;letter-spacing:.1em;font-weight:700">LAYER 6 · 终端 / 平台</div>
+      <h3 style="margin:6px 0">META · 最快增长 + 最便宜</h3>
+      <div class="alloc"><span class="pct">20%</span><span class="lbl">建议占组合比重</span></div>
+      <ul style="margin-top:10px">
+        <li>Q1 +33% 收入（最快增速 since 2021）</li>
+        <li>Advantage+ 已证明 AI 直接货币化路径</li>
+        <li>Forward PE 21-24x = 大盘股中最便宜的 AI 高增长</li>
+        <li>Capex 飙升是<em>风险但也是护城河</em>——别人追不上</li>
+      </ul>
+    </div>
+
+    <div class="portfolio-card">
+      <div style="color:var(--layer1);font-size:11px;letter-spacing:.1em;font-weight:700">LAYER 1 · 半导体</div>
+      <h3 style="margin:6px 0">AVGO · 多元化卖铲子</h3>
+      <div class="alloc"><span class="pct">20%</span><span class="lbl">建议占组合比重</span></div>
+      <ul style="margin-top:10px">
+        <li>定制 AI 硅片大客户：GOOGL TPU、META、MSFT</li>
+        <li>VMware 软件提供高利润现金流</li>
+        <li>客户分散 ≫ NVDA，单点失败风险更低</li>
+        <li>Forward PE 33x，FCF margin 45%，股息 ~1.2%</li>
+      </ul>
+    </div>
+
+    <div class="portfolio-card">
+      <div style="color:var(--layer5);font-size:11px;letter-spacing:.1em;font-weight:700">LAYER 5 · 应用层 (反向)</div>
+      <h3 style="margin:6px 0">NOW · 估值修复 + AI 货币化</h3>
+      <div class="alloc"><span class="pct">15%</span><span class="lbl">建议占组合比重</span></div>
+      <ul style="margin-top:10px">
+        <li>YoY -53%（!）= 估值已极度修复</li>
+        <li>Now Assist 已达 $1B 年化合同价值——<em>企业 AI 货币化最成功案例</em></li>
+        <li>+21% 增速 + 企业 IT 黏性 + 合规护城河</li>
+        <li>Forward PE 21x = 历史最低</li>
+      </ul>
+    </div>
+
+    <div class="portfolio-card">
+      <div style="color:var(--layer1);font-size:11px;letter-spacing:.1em;font-weight:700">LAYER 1 · 半导体（核心）</div>
+      <h3 style="margin:6px 0">NVDA · 行业王者</h3>
+      <div class="alloc"><span class="pct">20%</span><span class="lbl">建议占组合比重</span></div>
+      <ul style="margin-top:10px">
+        <li>+73% 收入增长，PE 仅 23x = 历史最便宜</li>
+        <li>Blackwell + Rubin 路线图明确</li>
+        <li>CUDA 软件生态护城河无人能复制</li>
+        <li>风险：客户集中（hyperscaler 占 50%+），但分散是 5 家分散，不是 1 家</li>
+      </ul>
+    </div>
+
+    <div class="portfolio-card" style="border-left:4px dashed var(--mute);background:var(--panel)">
+      <div style="color:var(--mute);font-size:11px;letter-spacing:.1em;font-weight:700">替补 · WATCHLIST</div>
+      <h3 style="margin:6px 0">候选标的（视情况增加）</h3>
+      <ul style="margin-top:10px">
+        <li><strong>DDOG</strong> — 数据基建首选，等回调 -10%</li>
+        <li><strong>VRT</strong> — 物理基建溢价大，等 capex 减速回调</li>
+        <li><strong>CRM</strong> — Deep value，等 AI 货币化数据</li>
+        <li><strong>TSM</strong> — 估值最合理但地缘风险</li>
+        <li><strong>PLTR</strong> — 等 PE 回到 60-80x 区间</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin-top:30px">组合特性（5 名核心）</h3>
+  <div class="grid grid-3">
+    <div class="panel">
+      <h3 style="color:var(--accent)">分层覆盖</h3>
+      <ul>
+        <li>L1 半导体: NVDA + AVGO (40%)</li>
+        <li>L3 云: GOOGL (25%)</li>
+        <li>L5 应用: NOW (15%)</li>
+        <li>L6 终端: META (20%)</li>
+        <li>无 L2/L4 暴露 — 通过 hyperscaler 间接获得</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3 style="color:var(--accent)">估值组合</h3>
+      <ul>
+        <li>加权 Forward PE: ~25x</li>
+        <li>低于纳斯达克均值 (~30x)</li>
+        <li>NOW + META 提供深度价值</li>
+        <li>NVDA + GOOGL 提供成长溢价</li>
+        <li>整体 risk-adjusted 估值合理</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h3 style="color:var(--accent)">风险分散</h3>
+      <ul>
+        <li>客户集中度: AVGO 比 NVDA 分散</li>
+        <li>地理: 全球暴露，无单一市场</li>
+        <li>商业模式: 硬件 + 云 + SaaS + 广告</li>
+        <li>AI 路线: 通用 GPU + 定制 + 自研模型并存</li>
+        <li>风险互不重叠</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin-top:30px">建仓节奏建议</h3>
+  <div class="grid grid-3">
+    <div class="portfolio-card">
+      <div style="color:var(--green);font-size:11px;letter-spacing:.1em;font-weight:700">第 1 阶段 · 立即建仓</div>
+      <h3 style="margin:6px 0">GOOGL + NOW + META</h3>
+      <p style="font-size:13px;margin-top:6px">三只都在估值合理区间，不需要等催化。GOOGL 已证明 AI thesis；NOW/META 估值有缓冲。<em>占满仓 60%</em></p>
+    </div>
+    <div class="portfolio-card">
+      <div style="color:var(--amber);font-size:11px;letter-spacing:.1em;font-weight:700">第 2 阶段 · 等回调 5-10%</div>
+      <h3 style="margin:6px 0">NVDA + AVGO</h3>
+      <p style="font-size:13px;margin-top:6px">两只半导体一年都涨多了，等到任何 hyperscaler capex 减速预警 → 短期回调 → 建仓。<em>占满仓 40%</em></p>
+    </div>
+    <div class="portfolio-card">
+      <div style="color:var(--accent);font-size:11px;letter-spacing:.1em;font-weight:700">第 3 阶段 · 触发性加仓</div>
+      <h3 style="margin:6px 0">DDOG / CRM / TSM</h3>
+      <p style="font-size:13px;margin-top:6px">如果某个 catalyst 触发（DDOG 下次财报、CRM Agentforce ACV 数据、TSM 地缘缓和）→ 替换或增加 1-2 只。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 11. Risks ============================ -->
+<section id="risks">
+  <h2><span class="num">11</span>三类系统性风险</h2>
+  <div class="grid grid-3">
+    <div class="panel panel-bear">
+      <h3>① AI capex 周期见顶</h3>
+      <p style="font-size:13.5px">2026 年 4 大科技 capex $710B 是天文数字。如果 H2 / 2027 任一大厂宣布"capex 减速"，整条价值链——尤其 L1/L2——会被瞬间重新定价。</p>
+      <p style="font-size:13.5px;margin-top:10px"><strong>对组合影响</strong>：NVDA + AVGO + VRT 类标的最受冲击。这是<em>为什么不要 100% 押注硬件</em>。</p>
+    </div>
+    <div class="panel panel-bear">
+      <h3>② 应用层 AI ROI 仍未证明</h3>
+      <p style="font-size:13.5px">PwC 调查 56% CEO 表示尚未从 AI 看到可量化收益。如果 H2 2026 / 2027 数据仍然"找不到 ROI"，整个企业 SaaS 板块（NOW/CRM 等）可能再下一个台阶。</p>
+      <p style="font-size:13.5px;margin-top:10px"><strong>对组合影响</strong>：NOW / CRM 反向 thesis 失败。这就是<em>为什么 NOW 只占 15%</em>而不是 25%。</p>
+    </div>
+    <div class="panel panel-bear">
+      <h3>③ 监管 + 地缘</h3>
+      <p style="font-size:13.5px">美国对中国出口管制可能扩大；欧盟 AI Act 已落地；台海风险定价不足；欧美反垄断（GOOGL search、META 数字广告）。任何一个发酵都会冲击大型科技的估值。</p>
+      <p style="font-size:13.5px;margin-top:10px"><strong>对组合影响</strong>：GOOGL 反垄断 + TSM 地缘是最大暴露。<em>为何 TSM 没进核心 5 只</em>。</p>
+    </div>
+  </div>
+
+  <div class="alert" style="margin-top:18px"><strong>组合风险预算</strong>：5 名核心组合应占总组合的 <em>15-25%</em>（不超过四分之一）。AI 是结构性主题但仍可能有 30-40% drawdown 周期。其余仓位用于现金流、防御性、地理多元化。</div>
+</section>
+
+<!-- ============================ Sources ============================ -->
+<footer>
+  <strong style="color:var(--accent);font-size:13px;letter-spacing:.08em">来源 / SOURCES</strong>
+  <a href="https://finance.yahoo.com/news/3-leading-ai-stocks-investors-185800576.html" target="_blank">3 Leading AI Stocks Investors Can Buy for 2026 (NVDA, AVGO, VRT)</a>
+  <a href="https://www.fool.com/investing/2026/04/30/meet-the-artificial-intelligence-ai-infrastructure/" target="_blank">AI Infrastructure Stock 270% Jump (VRT) · Motley Fool</a>
+  <a href="https://fortune.com/2026/04/29/microsoft-meta-google-ai-capex-spending-billions/" target="_blank">Microsoft, Meta, Google AI Capex · Fortune</a>
+  <a href="https://www.cnbc.com/2026/04/29/meta-q1-earnings-report-2026.html" target="_blank">Meta Q1 2026 Earnings Report · CNBC</a>
+  <a href="https://parameter.io/5-ai-stocks-trading-below-their-true-value-in-2026-meta-googl-msft-lead/" target="_blank">5 AI Stocks Trading Below True Value: META, GOOGL, MSFT</a>
+  <a href="https://www.tikr.com/blog/salesforce-vs-servicenow-which-enterprise-software-stock-wins-over-the-next-5-years" target="_blank">Salesforce vs ServiceNow 5-Year Outlook · TIKR</a>
+  <a href="https://www.tikr.com/blog/datadog-vs-snowflake-which-cloud-data-stock-is-the-better-growth-play" target="_blank">Datadog vs Snowflake AI Infrastructure · TIKR</a>
+  <a href="https://247wallst.com/investing/2026/05/01/arm-marvell-or-vertiv-which-ai-infrastructure-stock-crushed-it-in-april/" target="_blank">ARM, Marvell, Vertiv April 2026 Performance · 24/7 Wall St</a>
+  <a href="https://www.foreignpolicyjournal.com/2026/05/05/ai-stocks-face-sharpening-divide-between-leaders-like-nvda-and-laggards-like-msft/" target="_blank">AI Stocks Sharpening Divide · Foreign Policy Journal</a>
+
+  <p class="disclaimer">本研究仅为投资框架与个人分析，非投资建议。所有评分、估值假设和组合权重反映分析师主观判断。AI 主题仍处于早期 + 高波动期，重大 drawdown 是常态。读者应自行核实数据并结合个人风险偏好。数据截至 2026-05-06。</p>
+</footer>
+
+</div>
+
+<!-- ================ CHARTS ================ -->
+<script>
+const baseFont = {family:"-apple-system,BlinkMacSystemFont,sans-serif",size:11};
+const gridColor = "rgba(140,160,200,0.08)";
+const axisColor = "#8aa0c2";
+Chart.defaults.color = axisColor;
+Chart.defaults.font = baseFont;
+
+// Chart 1: Hardware vs Software divergence
+new Chart(document.getElementById('divergenceChart'),{
+  type:'bar',
+  data:{
+    labels:['VRT','MRVL','ANET','NVDA','META','GOOGL','SNOW','CRM','NOW','PLTR','DDOG'],
+    datasets:[{
+      label:'1Y 涨跌幅 (%)',
+      data:[270,165,33,40,30,28,-25,-32,-53,80,15],
+      backgroundColor:(c)=>{
+        const v=c.parsed.y;
+        if(v>=100) return '#2ecc71';
+        if(v>=20) return '#48dbfb';
+        if(v>=0) return '#f0b950';
+        return '#e74c3c';
+      },
+      borderRadius:4
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:c=>c.parsed.y+'%'}},
+      title:{display:true,text:'硬件/基建 (绿) 大涨 vs 软件/SaaS (红) 大跌',color:'#cdd7e8',padding:{bottom:10}}
+    },
+    scales:{
+      y:{grid:{color:gridColor},ticks:{callback:v=>v+'%'}},
+      x:{grid:{display:false}}
+    }
+  }
+});
+
+// Chart 2: Score vs expected return scatter
+new Chart(document.getElementById('scoreChart'),{
+  type:'scatter',
+  data:{
+    datasets:[
+      {label:'GOOGL (L3)',data:[{x:8.6,y:30,r:30}],backgroundColor:'#feca57'},
+      {label:'META (L6)',data:[{x:8.6,y:35,r:28}],backgroundColor:'#ff5e8a'},
+      {label:'AVGO (L1)',data:[{x:8.4,y:25,r:22}],backgroundColor:'#ff6b6b'},
+      {label:'NVDA (L1)',data:[{x:8.4,y:20,r:32}],backgroundColor:'#ff6b6b'},
+      {label:'NOW (L5)',data:[{x:8.2,y:50,r:14}],backgroundColor:'#a991e8'},
+      {label:'DDOG (L4)',data:[{x:8.0,y:30,r:10}],backgroundColor:'#48dbfb'},
+      {label:'TSM (L1)',data:[{x:8.0,y:25,r:25}],backgroundColor:'#ff6b6b'},
+      {label:'VRT (L2)',data:[{x:7.8,y:15,r:14}],backgroundColor:'#ff9f43'},
+      {label:'SNOW (L4)',data:[{x:7.6,y:40,r:10}],backgroundColor:'#48dbfb'},
+      {label:'CRM (L5)',data:[{x:7.6,y:35,r:13}],backgroundColor:'#a991e8'},
+      {label:'ANET (L2)',data:[{x:7.6,y:20,r:11}],backgroundColor:'#ff9f43'},
+      {label:'MSFT (L3)',data:[{x:7.4,y:15,r:30}],backgroundColor:'#feca57'},
+      {label:'AAPL (L6)',data:[{x:7.2,y:10,r:30}],backgroundColor:'#ff5e8a'},
+      {label:'AMZN (L3)',data:[{x:7.2,y:18,r:25}],backgroundColor:'#feca57'},
+      {label:'PLTR (L5)',data:[{x:7.2,y:-10,r:14}],backgroundColor:'#a991e8'},
+      {label:'AMD (L1)',data:[{x:6.2,y:10,r:14}],backgroundColor:'#ff6b6b'}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'bottom',labels:{padding:8,boxWidth:8,font:{size:10}}},
+      tooltip:{callbacks:{label:c=>`${c.dataset.label}: 评分${c.parsed.x}, 预期回报${c.parsed.y}%`}},
+      title:{display:true,text:'右上角 = 评分高 + 预期回报高 = 最佳标的',color:'#cdd7e8',padding:{bottom:10}}
+    },
+    scales:{
+      y:{title:{display:true,text:'12个月预期回报 (%)'},grid:{color:gridColor},min:-20,max:60},
+      x:{title:{display:true,text:'综合评分'},grid:{color:gridColor},min:6,max:9}
+    }
+  }
+});
+</script>
+</body>
+</html>

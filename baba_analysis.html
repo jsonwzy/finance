@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>阿里巴巴 (BABA) 投资分析 — 2026年5月</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d1117;
+    --bg-card: #161b22;
+    --bg-elev: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-mute: #8b949e;
+    --accent: #ff6a00;
+    --green: #3fb950;
+    --red: #f85149;
+    --amber: #d29922;
+    --blue: #58a6ff;
+  }
+  body {
+    font-family: -apple-system, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    font-size: 14.5px;
+  }
+  .container { max-width: 1180px; margin: 0 auto; padding: 28px 24px 80px; }
+
+  /* Header */
+  .header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 22px;
+    margin-bottom: 28px;
+  }
+  .header-top { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 12px; }
+  .ticker { display: flex; align-items: baseline; gap: 14px; }
+  .ticker h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; }
+  .ticker-symbol {
+    background: var(--accent); color: white; padding: 3px 9px;
+    border-radius: 4px; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;
+  }
+  .meta { color: var(--text-mute); font-size: 13px; margin-top: 6px; }
+  .price-block { text-align: right; }
+  .price { font-size: 26px; font-weight: 700; }
+  .price-meta { color: var(--text-mute); font-size: 12px; }
+
+  /* Verdict box */
+  .verdict {
+    display: grid; grid-template-columns: 140px 1fr 220px;
+    gap: 22px; align-items: center;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-left: 4px solid var(--green);
+    border-radius: 6px; padding: 18px 22px; margin: 18px 0 6px;
+  }
+  .verdict-tag {
+    background: var(--green); color: #0d1117; font-weight: 700;
+    font-size: 18px; text-align: center; padding: 14px 6px;
+    border-radius: 4px; letter-spacing: 1px;
+  }
+  .verdict-text { font-size: 14px; color: var(--text); }
+  .verdict-text strong { color: var(--accent); }
+  .verdict-target { text-align: right; }
+  .verdict-target .num { font-size: 22px; font-weight: 700; color: var(--green); }
+  .verdict-target .label { font-size: 11px; color: var(--text-mute); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Sections */
+  section { margin-top: 42px; }
+  h2 {
+    font-size: 20px; font-weight: 600;
+    border-left: 3px solid var(--accent); padding-left: 12px;
+    margin-bottom: 18px; letter-spacing: -0.3px;
+  }
+  h3 { font-size: 15.5px; font-weight: 600; margin: 22px 0 10px; color: var(--text); }
+  p { margin-bottom: 12px; color: var(--text); }
+  p.lead { color: var(--text-mute); }
+
+  /* Cards / Grid */
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 760px) {
+    .grid-3, .grid-4, .grid-2 { grid-template-columns: 1fr; }
+    .verdict { grid-template-columns: 1fr; text-align: center; }
+    .verdict-target { text-align: center; }
+  }
+
+  .card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 14px 16px;
+  }
+  .card .label { color: var(--text-mute); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px;}
+  .card .value { font-size: 21px; font-weight: 700; color: var(--text); }
+  .card .delta { font-size: 12px; margin-top: 4px; }
+  .delta.up { color: var(--green); }
+  .delta.down { color: var(--red); }
+  .delta.neutral { color: var(--text-mute); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 8px 0; }
+  th, td { padding: 9px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { background: var(--bg-elev); color: var(--text-mute); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr:hover td { background: rgba(88,166,255,0.04); }
+  tr.total td { font-weight: 700; border-top: 2px solid var(--accent); border-bottom: none; background: var(--bg-elev); }
+
+  /* Chart container */
+  .chart-wrap {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 16px; height: 320px; position: relative;
+  }
+  .chart-wrap.tall { height: 380px; }
+  .chart-title { font-size: 13px; color: var(--text-mute); margin-bottom: 8px; }
+
+  /* Bull/Bear */
+  .bull-bear { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .bull-bear { grid-template-columns: 1fr; } }
+  .bull, .bear {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: 6px; padding: 18px 20px;
+  }
+  .bull { border-top: 3px solid var(--green); }
+  .bear { border-top: 3px solid var(--red); }
+  .bull h3 { color: var(--green); margin-top: 0;}
+  .bear h3 { color: var(--red); margin-top: 0;}
+  .bull ul, .bear ul { padding-left: 18px; }
+  .bull li, .bear li { margin: 8px 0; color: var(--text); }
+
+  /* Notes */
+  .note {
+    background: rgba(210, 153, 34, 0.08); border-left: 3px solid var(--amber);
+    padding: 11px 14px; border-radius: 4px; font-size: 13px; color: var(--text-mute); margin: 14px 0;
+  }
+  .source-note { font-size: 11.5px; color: var(--text-mute); margin-top: 6px; font-style: italic; }
+  .footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border); color: var(--text-mute); font-size: 12px; }
+
+  /* TOC */
+  .toc {
+    background: var(--bg-elev); border: 1px solid var(--border); border-radius: 6px;
+    padding: 14px 18px; margin: 20px 0; font-size: 13px;
+  }
+  .toc a { color: var(--blue); text-decoration: none; margin-right: 14px; }
+  .toc a:hover { text-decoration: underline; }
+
+  .badge {
+    display: inline-block; font-size: 10.5px; padding: 2px 7px; border-radius: 3px;
+    background: var(--bg-elev); color: var(--text-mute); border: 1px solid var(--border);
+    text-transform: uppercase; letter-spacing: 0.3px; margin-left: 6px;
+  }
+  .badge.green { background: rgba(63,185,80,0.15); color: var(--green); border-color: rgba(63,185,80,0.4); }
+  .badge.red { background: rgba(248,81,73,0.15); color: var(--red); border-color: rgba(248,81,73,0.4); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="ticker">
+      <h1>阿里巴巴集团</h1>
+      <span class="ticker-symbol">NYSE: BABA</span>
+      <span class="ticker-symbol" style="background:#444;">9988.HK</span>
+    </div>
+    <div class="price-block">
+      <div class="price">$141.0</div>
+      <div class="price-meta">截至 2026-05-06 · 市值 ~$330bn</div>
+    </div>
+  </div>
+  <div class="meta">投资分析 · 长期持仓视角 · FY2026 Q3 (CY 2025/12) 业绩后</div>
+
+  <div class="verdict">
+    <div class="verdict-tag">买入</div>
+    <div class="verdict-text">
+      <strong>核心论点</strong>：阿里目前处于"利润压制 → 收入加速"切换期。云36%加速增长 + 三位数AI收入连续10季是定价权信号；电商主业利润被即时零售烧钱掩盖但份额可控；$425亿净现金 + 持续回购给下行铺底。当前24x trailing P/E反映短期阵痛但未充分计入云的二次成长。<br>
+      <strong>建议建仓</strong>：分3档建仓（$140 / $125 / $110），目标价 $190（+35%）。
+    </div>
+    <div class="verdict-target">
+      <div class="num">$190</div>
+      <div class="label">12个月目标价</div>
+      <div class="num" style="font-size:14px; color:var(--text-mute); margin-top:8px;">区间 $165 – $215</div>
+    </div>
+  </div>
+
+  <div class="toc">
+    <strong>目录:</strong>
+    <a href="#summary">①执行摘要</a>
+    <a href="#business">②业务版图</a>
+    <a href="#quarter">③最新季度</a>
+    <a href="#compete">④竞对比较</a>
+    <a href="#guidance">⑤管理层指引</a>
+    <a href="#valuation">⑥估值分析</a>
+    <a href="#analysts">⑦卖方观点</a>
+    <a href="#thesis">⑧多空论点</a>
+  </div>
+</div>
+
+<!-- ① EXECUTIVE SUMMARY -->
+<section id="summary">
+  <h2>① 执行摘要</h2>
+
+  <div class="grid-4">
+    <div class="card">
+      <div class="label">FY26Q3 总收入</div>
+      <div class="value">¥284.8bn</div>
+      <div class="delta up">+1.7% YoY · 不及预期</div>
+    </div>
+    <div class="card">
+      <div class="label">云收入增速</div>
+      <div class="value" style="color:var(--green);">+36.4%</div>
+      <div class="delta up">连续4个季度加速</div>
+    </div>
+    <div class="card">
+      <div class="label">调整后净利润</div>
+      <div class="value" style="color:var(--red);">-67% YoY</div>
+      <div class="delta down">即时零售 + AI capex 双烧</div>
+    </div>
+    <div class="card">
+      <div class="label">净现金</div>
+      <div class="value">$42.5bn</div>
+      <div class="delta neutral">占市值 ~13%</div>
+    </div>
+  </div>
+
+  <h3>5句话看懂阿里当前的状态</h3>
+  <p>1. <strong>战略重新统一</strong>：吴泳铭2024年中收回"6+N"分拆方案，确立"AI+电商"双引擎，现金流由淘天哺育云和AIDC，组织合并大幅减少内耗。</p>
+  <p>2. <strong>云的二次起飞</strong>：从拼多多冲击下挣扎多年的"边缘业务"重回主舞台 — 36%同比增速接近2018年水平，AI产品三位数增长持续10个季度，Qwen模型已成中文模型事实标准之一。</p>
+  <p>3. <strong>电商守势但不溃败</strong>：CMR基本平稳，但"淘宝闪购"补贴战让中国电商集团调整后EBITA同比塌陷43%，本季度光是即时零售就烧掉 ~¥50bn 补贴。</p>
+  <p>4. <strong>资本承诺空前</strong>：3年¥3,800亿(~$525亿)AI/云基建投入，CFO在Q3电话会明确表示"380亿这个数字可能偏小"，跟随北美超大规模厂商节奏。</p>
+  <p>5. <strong>股东回报底</strong>：18个月回购缩减股本约6%，FY26 派息 HK$1.96 (含特别股息)，估值低位下回购等同最佳capital allocation。</p>
+
+  <div class="note">
+    <strong>用户视角的关键问题</strong>：你买的不是"PE便宜的中国电商"，而是<u>"被低估的Hyperscaler+被定价为零的Qwen+稳态淘天现金牛"</u>。如果云未来12个月维持30%+增速且margin扩张，市场会从"按电商P/E定价"切换到"分部估值"（SOTP），股价重估空间约35–60%。
+  </div>
+</section>
+
+<!-- ② BUSINESS LANDSCAPE -->
+<section id="business">
+  <h2>② 业务版图：6大集团 + 一个引擎切换</h2>
+
+  <p class="lead">阿里2023年拆为6+N，2024年中悄悄"合并回"两大主轴：阿里集团核心(淘天+云+AIDC+菜鸟+本地生活)由吴泳铭统管，AI研发(通义/Qwen)拉出独立"Token业务集团"。下表是FY26Q3各分部的实际形态:</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>分部</th>
+        <th class="num">FY26Q3收入(¥bn)</th>
+        <th class="num">YoY增速</th>
+        <th class="num">调整后EBITA(¥bn)</th>
+        <th class="num">EBITA Margin</th>
+        <th>状态</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>淘天集团 (TTG)</strong><br><span style="color:var(--text-mute);font-size:12px;">淘宝+天猫+1688+闪购</span></td>
+        <td class="num">159.3</td>
+        <td class="num" style="color:var(--green);">+6.0%</td>
+        <td class="num">34.6</td>
+        <td class="num">21.7%</td>
+        <td>现金牛 · 利润被即时零售拖累</td>
+      </tr>
+      <tr>
+        <td><strong>云智能集团 (CIG)</strong><br><span style="color:var(--text-mute);font-size:12px;">阿里云+通义/Qwen</span></td>
+        <td class="num">43.3</td>
+        <td class="num" style="color:var(--green);">+36.4%</td>
+        <td class="num">3.9</td>
+        <td class="num">9.0%</td>
+        <td><span class="badge green">加速</span> AI引擎</td>
+      </tr>
+      <tr>
+        <td><strong>AIDC国际数字商业</strong><br><span style="color:var(--text-mute);font-size:12px;">AliExpress+Lazada+Trendyol</span></td>
+        <td class="num">39.2</td>
+        <td class="num" style="color:var(--green);">+3.8%</td>
+        <td class="num">-2.0</td>
+        <td class="num">-5.2%</td>
+        <td>亏损收窄(去年-4.95)，接近盈亏平衡</td>
+      </tr>
+      <tr>
+        <td><strong>本地生活 + 即时零售</strong><br><span style="color:var(--text-mute);font-size:12px;">原饿了么改名"淘宝闪购"</span></td>
+        <td class="num">~25</td>
+        <td class="num" style="color:var(--green);">+56%</td>
+        <td class="num">~-15</td>
+        <td class="num">-60%</td>
+        <td><span class="badge red">烧钱</span> 补贴战</td>
+      </tr>
+      <tr>
+        <td><strong>菜鸟物流</strong></td>
+        <td class="num">~28</td>
+        <td class="num">+8%</td>
+        <td class="num">~1.0</td>
+        <td class="num">3.5%</td>
+        <td>稳态 · IPO已搁置</td>
+      </tr>
+      <tr>
+        <td><strong>数字媒体+创新业务</strong></td>
+        <td class="num">~7</td>
+        <td class="num">+5%</td>
+        <td class="num">-1</td>
+        <td class="num">-14%</td>
+        <td>非核心，存在剥离可能</td>
+      </tr>
+      <tr class="total">
+        <td>合并 (含抵消)</td>
+        <td class="num">284.8</td>
+        <td class="num">+1.7%</td>
+        <td class="num">~21</td>
+        <td class="num">~7.4%</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="grid-2" style="margin-top:18px;">
+    <div class="chart-wrap">
+      <div class="chart-title">FY26Q3 收入分部占比</div>
+      <canvas id="revMixChart"></canvas>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-title">分部增速对比 (YoY %)</div>
+      <canvas id="growthChart"></canvas>
+    </div>
+  </div>
+
+  <h3>战略关键点 — 你需要理解的3个事</h3>
+  <p><strong>(a) 淘宝闪购 = 战略防御不是新增长极。</strong> 美团的Shangou曾威胁淘宝在低线市场和年轻用户的复购心智。阿里2025年砸¥50bn补贴换来3亿月活和单日1.2亿订单。这是<u>用现金保心智</u>，不要期望短期变现，但等补贴战平息(预计2026下半年)，3亿用户存量会回流主站交易。</p>
+  <p><strong>(b) 云 = 中国对外输出AI能力最完整的玩家。</strong> 字节有豆包(自研主力模型，benchmark上跟Qwen互有胜负)，但火山引擎云市场份额仍小且豆包以服务抖音/TikTok内部推荐为主，企业外销刚起步；腾讯云规模较小且混元主要服务自身生态；华为云盘古以行业模型为主+受芯片采购限制。阿里的差异化是<u>「IaaS市场份额第一(~36%) + Qwen开源生态主导地位 + 15年企业客户积累」三位一体</u> — Qwen开源策略让全球开发者大量基于Qwen微调衍生模型(HuggingFace下载量已超Llama)，这是其它中国厂商没有的网络效应护城河。</p>
+  <p><strong>(c) 国际(AIDC)将于FY27扭亏。</strong> AliExpress Choice业务UE改善是关键变量，与Temu不同的是阿里有Lazada+Trendyol的本地化壁垒；亏损从去年同期¥4.95bn收窄到¥2.0bn，扭亏点临近。</p>
+</section>
+
+<!-- ③ LATEST QUARTER -->
+<section id="quarter">
+  <h2>③ FY26Q3业绩拆解 (CY 2025/12)</h2>
+
+  <p class="lead">表面"收入miss + 利润崩塌"，但拆开看是<strong>典型的战略性投入期</strong>：开支前置(capex+补贴)，回报后置(云容量+用户留存)。</p>
+
+  <div class="grid-2">
+    <div class="chart-wrap tall">
+      <div class="chart-title">最近6季度收入与同比增速</div>
+      <canvas id="revTrendChart"></canvas>
+    </div>
+    <div class="chart-wrap tall">
+      <div class="chart-title">云EBITA Margin走势</div>
+      <canvas id="cloudMarginChart"></canvas>
+    </div>
+  </div>
+
+  <h3>财务亮点 (Bull)</h3>
+  <ul style="padding-left:20px;">
+    <li>云收入¥43.3bn，同比+36.4%，<strong>从去年Q3的+7%一路加速到本季度</strong>，是过去6年最强季度增速。</li>
+    <li>云EBITA同比+25%，证明加速增长 ≠ 牺牲利润，与AWS/Azure的"AI规模收益"模型一致。</li>
+    <li>AIDC亏损同比收窄~60%，AliExpress Choice在欧洲单位经济性持续改善。</li>
+    <li>FCF仍正(虽下滑)，净现金$42.5bn，持续大额回购在低位上吸筹。</li>
+  </ul>
+
+  <h3>财务压力 (Bear)</h3>
+  <ul style="padding-left:20px;">
+    <li>淘天EBITA -43%同比，反映即时零售订单贡献负毛利 + 主站CMR rebate增加(为留住卖家)。</li>
+    <li>整体集团调整后EBITA -57%同比，集团调整后净利润-67%。</li>
+    <li>capex急升 — 单季度AI+云投入¥38.6bn，全年指引或超¥130bn。</li>
+    <li>1.7%总收入增长低于市场预期2-3%，反映宏观消费仍弱+剥离非核心资产的结构性下拉。</li>
+  </ul>
+</section>
+
+<!-- ④ COMPETITIVE -->
+<section id="compete">
+  <h2>④ 竞争格局：电商三国杀 + 云双寡头</h2>
+
+  <h3>电商主战场：BABA vs PDD vs JD</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>公司</th>
+        <th class="num">最新季度收入</th>
+        <th class="num">YoY增速</th>
+        <th class="num">调整后净利率</th>
+        <th>定位</th>
+        <th>关键风险</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>阿里 (BABA)</strong></td>
+        <td class="num">¥284.8bn</td>
+        <td class="num">+1.7%</td>
+        <td class="num">~10%</td>
+        <td>全品类+高端+B2B</td>
+        <td>即时零售烧钱周期</td>
+      </tr>
+      <tr>
+        <td><strong>拼多多 (PDD)</strong></td>
+        <td class="num">¥123.9bn</td>
+        <td class="num" style="color:var(--green);">+12%</td>
+        <td class="num">~25%</td>
+        <td>低价+下沉+Temu</td>
+        <td>Temu关税/监管+增速失速(去年90%→今年12%)</td>
+      </tr>
+      <tr>
+        <td><strong>京东 (JD)</strong></td>
+        <td class="num">¥352.3bn</td>
+        <td class="num">+1.5%</td>
+        <td class="num" style="color:var(--red);">营业亏损</td>
+        <td>3C家电+物流+B2C</td>
+        <td>家电以旧换新基数高+外卖战亏损扩大</td>
+      </tr>
+      <tr>
+        <td><strong>美团 (Meituan)</strong></td>
+        <td class="num">~¥80bn</td>
+        <td class="num">+8%</td>
+        <td class="num" style="color:var(--red);">-15bn 净亏损</td>
+        <td>外卖+到店+闪购</td>
+        <td>阿里淘宝闪购+京东JD NOW三方挤压</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>关键洞察</strong>：PDD虽然估值最便宜(forward PE ~9x)，但增速从2024年90%坠落至2025Q4的12%，<u>"超低基数+Temu美国限制"双杀</u>，PDD的"反脆弱"叙事正在受考验。阿里的优势是<strong>多业务对冲</strong>——电商烧钱时云顶上来，2027电商回血时云已经regrade完。
+  </div>
+
+  <h3>云市场：BABA vs Tencent vs 华为云</h3>
+  <p>中国云2025年市场格局(IDC估算): 阿里云 ~36% / 华为云 ~17% / 腾讯云 ~14% / 中国电信天翼 ~10% / 字节火山 ~8%。<strong>阿里是唯一能与AWS/Azure在AI算力规模上对标的中国厂商。</strong></p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>公司</th>
+        <th class="num">2025云收入(估)</th>
+        <th class="num">YoY增速</th>
+        <th>AI模型</th>
+        <th>盈利状态</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>阿里云</td><td class="num">~¥160bn</td><td class="num" style="color:var(--green);">+30%加速</td><td>Qwen 3.5(开源+商用)</td><td>EBITA margin 9% 扩张中</td></tr>
+      <tr><td>腾讯云</td><td class="num">~¥75bn</td><td class="num">+22%(Q4)</td><td>混元(自用为主)</td><td>2025年规模化盈利</td></tr>
+      <tr><td>华为云</td><td class="num">~¥80bn</td><td class="num">+18%</td><td>盘古(行业为主)</td><td>盈利</td></tr>
+      <tr><td>字节火山</td><td class="num">~¥40bn</td><td class="num">+50%+</td><td>豆包(自用为主，对外加速)</td><td>预计仍亏损</td></tr>
+    </tbody>
+  </table>
+
+  <div class="chart-wrap" style="margin-top:14px; height:340px;">
+    <div class="chart-title">中国电商主要玩家 估值倍数对比 (Forward P/E)</div>
+    <canvas id="peCompChart"></canvas>
+  </div>
+</section>
+
+<!-- ⑤ GUIDANCE -->
+<section id="guidance">
+  <h2>⑤ 管理层指引 & 资本配置</h2>
+
+  <h3>Capex指引：3年¥380bn → 可能上调</h3>
+  <p>2025年2月，吴泳铭宣布<strong>FY26-FY28三年¥3,800亿(~$525亿) AI+云基建投入</strong>，是历史peak的3倍以上。Q3电话会(2026/3/18)中CFO徐宏明确说："<em>380亿这个数字 might be on the small side, certainly in terms of the customer demand we're currently seeing.</em>" 暗示2026下半年或2027年可能再加码。</p>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="label">FY26 Capex (估)</div>
+      <div class="value">¥130bn+</div>
+      <div class="delta neutral">vs FY25 ¥85bn</div>
+    </div>
+    <div class="card">
+      <div class="label">FY26-28 累计承诺</div>
+      <div class="value">¥380bn+</div>
+      <div class="delta up">CFO暗示偏低</div>
+    </div>
+    <div class="card">
+      <div class="label">现金保护垫</div>
+      <div class="value">$42.5bn</div>
+      <div class="delta neutral">充分覆盖capex</div>
+    </div>
+  </div>
+
+  <h3>电话会要点 (FY26Q3)</h3>
+  <ul style="padding-left:20px;">
+    <li><strong>云增速指引</strong>：CFO确认"未来几个季度增速保持在30%+区间"，没有明确给出年度指引但暗示加速延续。</li>
+    <li><strong>淘宝闪购的盈利路径</strong>：管理层表示"补贴战将在2026下半年趋于理性"，预计FY27开始即时零售UE改善，全年亏损规模可能缩小50%。</li>
+    <li><strong>Qwen商业化</strong>：成立独立"Token业务集团"，对外API tokens营收快速放量。管理层暗示Qwen未来可能独立估值或分拆。</li>
+    <li><strong>淘天主站</strong>：CMR(客户管理收入)同比+5%，take rate稳定。management认为竞争格局已经"基本稳定"，不会再有2024年那种快速失血。</li>
+    <li><strong>资本回报</strong>：剩余回购授权约$200亿，承诺持续执行；2026年7月分红 $1.05/ADR。</li>
+  </ul>
+
+  <h3>资本配置历史与现状</h3>
+  <table>
+    <thead><tr><th>项目</th><th>FY24</th><th>FY25</th><th>FY26 (估)</th><th>FY27 (估)</th></tr></thead>
+    <tbody>
+      <tr><td>Capex (¥bn)</td><td>~50</td><td>~85</td><td class="num">~135</td><td class="num">~150</td></tr>
+      <tr><td>回购支出 ($bn)</td><td>12.5</td><td>15.8</td><td class="num">~10</td><td class="num">~8</td></tr>
+      <tr><td>分红 ($bn)</td><td>2.5</td><td>4.0</td><td class="num">~4.0</td><td class="num">~4.5</td></tr>
+      <tr><td>FCF ($bn)</td><td>22</td><td>17</td><td class="num">~10-12</td><td class="num">~15</td></tr>
+      <tr><td>股本变动</td><td>-3.3%</td><td>-2.7%</td><td class="num">-2.0%</td><td class="num">-1.5%</td></tr>
+    </tbody>
+  </table>
+  <p class="source-note">FCF FY26-27下降反映capex前置；股本回购速率随股价上涨自然放缓。</p>
+</section>
+
+<!-- ⑥ VALUATION -->
+<section id="valuation">
+  <h2>⑥ 估值分析：SOTP + 倍数比较</h2>
+
+  <h3>(a) Comp 倍数对比</h3>
+  <table>
+    <thead>
+      <tr><th>公司</th><th class="num">市值($bn)</th><th class="num">Trailing P/E</th><th class="num">Forward P/E</th><th class="num">EV/EBITDA</th><th class="num">EV/Sales</th><th class="num">收入增速</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>BABA</strong></td><td class="num">330</td><td class="num">25</td><td class="num">19.5</td><td class="num">13.9</td><td class="num">2.0</td><td class="num">+1.7%</td></tr>
+      <tr><td>PDD</td><td class="num">155</td><td class="num">10</td><td class="num">9.4</td><td class="num">5.7</td><td class="num">2.5</td><td class="num">+12%</td></tr>
+      <tr><td>JD</td><td class="num">55</td><td class="num">10</td><td class="num">10.0</td><td class="num">13.9</td><td class="num">0.3</td><td class="num">+1.5%</td></tr>
+      <tr><td>Tencent</td><td class="num">630</td><td class="num">19</td><td class="num">13.9</td><td class="num">15.4</td><td class="num">5.5</td><td class="num">+13%</td></tr>
+      <tr><td>Meituan</td><td class="num">75</td><td class="num">N/A</td><td class="num">25</td><td class="num">35</td><td class="num">2.0</td><td class="num">+8%</td></tr>
+      <tr><td colspan="7" style="background:var(--bg-elev);font-style:italic;color:var(--text-mute);font-size:12px;">海外参照</td></tr>
+      <tr><td>Amazon</td><td class="num">2,400</td><td class="num">38</td><td class="num">28</td><td class="num">17</td><td class="num">3.0</td><td class="num">+11%</td></tr>
+      <tr><td>Microsoft (云对比)</td><td class="num">3,500</td><td class="num">35</td><td class="num">28</td><td class="num">21</td><td class="num">12</td><td class="num">+13%</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>读法</strong>：BABA forward P/E 19.5x在中国电商里最贵，但<u>这个P/E是错配的</u> — 当前GAAP利润被即时零售战和capex折旧严重压制。如果把云按6x P/S（与亚马逊AWS段mark一致）单独估值就拿到~$60+/ADR，剩下市值对应的电商业务PE只有~12x，比PDD便宜。
+  </div>
+
+  <h3>(b) SOTP 分部估值</h3>
+  <p>这是判断阿里"应该值多少"的更严格框架：</p>
+  <table>
+    <thead>
+      <tr><th>分部</th><th>估值方法</th><th class="num">倍数</th><th class="num">基数 (FY26E ¥bn)</th><th class="num">企业价值 (¥bn)</th><th class="num">每ADR ($)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>淘天 (TTG)</td><td>EV/EBITA</td><td class="num">9x</td><td class="num">EBITA 200</td><td class="num">1,800</td><td class="num">107</td></tr>
+      <tr><td>云智能 (CIG)</td><td>EV/Sales</td><td class="num">6x</td><td class="num">收入 175</td><td class="num">1,050</td><td class="num">62</td></tr>
+      <tr><td>AIDC</td><td>EV/Sales</td><td class="num">1.5x</td><td class="num">收入 155</td><td class="num">230</td><td class="num">14</td></tr>
+      <tr><td>菜鸟物流</td><td>EV/Sales</td><td class="num">0.8x</td><td class="num">收入 110</td><td class="num">88</td><td class="num">5</td></tr>
+      <tr><td>本地生活+闪购</td><td>EV/Sales (折扣)</td><td class="num">0.5x</td><td class="num">收入 120</td><td class="num">60</td><td class="num">4</td></tr>
+      <tr><td>数媒+创新</td><td>账面/战略</td><td class="num">—</td><td class="num">—</td><td class="num">25</td><td class="num">1</td></tr>
+      <tr><td>蚂蚁集团33%股权</td><td>私募估值</td><td class="num">—</td><td class="num">—</td><td class="num">220</td><td class="num">13</td></tr>
+      <tr><td>其他战略股权</td><td>账面</td><td class="num">—</td><td class="num">—</td><td class="num">150</td><td class="num">9</td></tr>
+      <tr><td>净现金</td><td>账面</td><td class="num">1x</td><td class="num">$42.5bn</td><td class="num">306</td><td class="num">18</td></tr>
+      <tr class="total"><td>毛 SOTP 价值</td><td></td><td></td><td></td><td class="num">3,929</td><td class="num">$233</td></tr>
+      <tr><td>Holdco折扣</td><td>治理/复杂度</td><td class="num">-15%</td><td class="num"></td><td class="num">-590</td><td class="num">-35</td></tr>
+      <tr class="total"><td><strong>SOTP 净价值</strong></td><td></td><td></td><td></td><td class="num">3,339</td><td class="num"><strong>$198</strong></td></tr>
+    </tbody>
+  </table>
+  <p class="source-note">假设：1 USD = 7.2 RMB；ADR数 ~ 16.9亿股(经过持续回购后估算)。倍数参考DBS/Morgan Stanley/CMBI 2026研报。</p>
+
+  <h3>(c) 情景分析</h3>
+  <div class="grid-3">
+    <div class="card" style="border-left:3px solid var(--green);">
+      <div class="label">Bull · 概率 30%</div>
+      <div class="value" style="color:var(--green);">$240</div>
+      <p style="font-size:12.5px;color:var(--text-mute);margin-top:6px;">
+        云加速到40%+维持4季 · Qwen独立估值 · 即时零售战FY27全面停战 · 蚂蚁IPO重启。
+      </p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--blue);">
+      <div class="label">Base · 概率 50%</div>
+      <div class="value" style="color:var(--blue);">$190</div>
+      <p style="font-size:12.5px;color:var(--text-mute);margin-top:6px;">
+        云保持30%+ · 淘天EBITA FY27回血 · AIDC FY27扭亏 · capex按指引执行。
+      </p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--red);">
+      <div class="label">Bear · 概率 20%</div>
+      <div class="value" style="color:var(--red);">$110</div>
+      <p style="font-size:12.5px;color:var(--text-mute);margin-top:6px;">
+        即时零售战延续到FY28 · 云增速回落到20%以下 · 中美脱钩升级影响AIDC · capex回报率不及预期。
+      </p>
+    </div>
+  </div>
+
+  <p style="margin-top:14px;"><strong>期望值</strong> = 0.3×240 + 0.5×190 + 0.2×110 = <strong>$189 (~+34%)</strong>。与卖方consensus $189高度一致，但建仓节奏比单一目标价更重要。</p>
+</section>
+
+<!-- ⑦ ANALYST VIEWS -->
+<section id="analysts">
+  <h2>⑦ 卖方观点：覆盖与分歧</h2>
+
+  <p class="lead">阿里目前是华尔街中国互联网板块的"共识多头" — 在覆盖该股的47位分析师中，<strong>38家买入、2家持有、仅1家卖出</strong>。但目标价跨度极大($163 → $245)，分歧的核心不是"该不该买"，而是<u>"云该按什么倍数估值，即时零售亏损要计多深"</u>。</p>
+
+  <div class="grid-4">
+    <div class="card">
+      <div class="label">覆盖分析师</div>
+      <div class="value">47</div>
+      <div class="delta neutral">主流投行均覆盖</div>
+    </div>
+    <div class="card">
+      <div class="label">共识评级</div>
+      <div class="value" style="color:var(--green);">Strong Buy</div>
+      <div class="delta up">81% Buy / 17% Hold</div>
+    </div>
+    <div class="card">
+      <div class="label">平均目标价</div>
+      <div class="value">$189</div>
+      <div class="delta up">+34% 上行空间</div>
+    </div>
+    <div class="card">
+      <div class="label">目标价区间</div>
+      <div class="value">$163 – $245</div>
+      <div class="delta neutral">分歧度 ~50%</div>
+    </div>
+  </div>
+
+  <h3>主要投行立场一览</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>投行</th>
+        <th>评级</th>
+        <th class="num">目标价</th>
+        <th class="num">隐含上行</th>
+        <th>关键论点</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>JP Morgan</strong> <span class="badge green">最乐观</span></td>
+        <td>Overweight</td>
+        <td class="num" style="color:var(--green);">$245</td>
+        <td class="num">+74%</td>
+        <td>Alex Yao在2025/10将目标价从$170提至$245。核心论点：云增长可见性 + Qwen独立估值是"被市场忽视的隐藏资产"。</td>
+      </tr>
+      <tr>
+        <td><strong>Jefferies</strong></td>
+        <td>Buy</td>
+        <td class="num">$212</td>
+        <td class="num">+50%</td>
+        <td>2026年中国互联网首选(top pick)。重点突出吴泳铭的"5年内云+AI外部收入超$100bn"目标 — 隐含云CAGR ~25%+。Q3后从$225下调至$212反映即时零售战担忧。</td>
+      </tr>
+      <tr>
+        <td><strong>Citi</strong></td>
+        <td>Buy</td>
+        <td class="num">$217</td>
+        <td class="num">+54%</td>
+        <td>从$187上调至$217。关注AI产品三位数增速持续性 + AIDC接近扭亏的杠杆释放。</td>
+      </tr>
+      <tr>
+        <td><strong>Bernstein</strong></td>
+        <td>Outperform</td>
+        <td class="num">$200</td>
+        <td class="num">+42%</td>
+        <td>从$167上调至$200。强调阿里是"中国全栈AI平台 + 现金流支撑"组合，是Hyperscaler可比标的。</td>
+      </tr>
+      <tr>
+        <td><strong>Barclays</strong></td>
+        <td>Overweight</td>
+        <td class="num">$186</td>
+        <td class="num">+32%</td>
+        <td>Q3后从$190小幅下调至$186。Capex承诺过大 + 消费仍弱 = 短期EPS下修，但长期AI叙事不变。</td>
+      </tr>
+      <tr>
+        <td><strong>Morgan Stanley</strong> <span class="badge">中性偏多</span></td>
+        <td>Overweight</td>
+        <td class="num">$165</td>
+        <td class="num">+17%</td>
+        <td>从$150小幅上调。SOTP框架下mid-case $240，high-case $345(含Qwen独立$19/股)，但适用~30%折扣。相对保守。</td>
+      </tr>
+      <tr>
+        <td><strong>Goldman Sachs</strong> <span class="badge red">最保守</span></td>
+        <td>Buy</td>
+        <td class="num">$163</td>
+        <td class="num">+16%</td>
+        <td>认可AI投入价值，但即时零售亏损可能比公司指引更深。预计补贴战延续到2027年。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="chart-wrap" style="margin-top:18px; height:340px;">
+    <div class="chart-title">主要投行目标价区间 (vs 现价 $141)</div>
+    <canvas id="analystChart"></canvas>
+  </div>
+
+  <h3>分歧的核心：3个争论点</h3>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="label" style="color:var(--green);">争论点 1 · 云的估值倍数</div>
+      <p style="font-size:13px; margin-top:8px;">
+        <strong>多头(JPM/Jefferies)</strong>：吴泳铭的"5年$100bn"目标隐含CAGR 25%+，应该按6-8x P/S估值(对标AWS段)。<br><br>
+        <strong>空头(GS)</strong>：中国云需求集中度高，定价权有限，更适合4-5x P/S。<br><br>
+        <strong>差异 → ~$40/ADR</strong>
+      </p>
+    </div>
+    <div class="card">
+      <div class="label" style="color:var(--amber);">争论点 2 · 即时零售何时停战</div>
+      <p style="font-size:13px; margin-top:8px;">
+        <strong>多头</strong>：监管已开始关注无序竞争，2026下半年市场默契形成，FY27减亏一半。<br><br>
+        <strong>空头(GS)</strong>：美团/JD都有现金弹药硬扛，价格战可能延续到FY28。<br><br>
+        <strong>差异 → ~$25/ADR</strong>
+      </p>
+    </div>
+    <div class="card">
+      <div class="label" style="color:var(--blue);">争论点 3 · Qwen独立估值</div>
+      <p style="font-size:13px; margin-top:8px;">
+        <strong>多头(MS高端SOTP)</strong>：成立独立"Token业务集团"暗示分拆可能，类比OpenAI估值给$15-20/股。<br><br>
+        <strong>空头</strong>：开源模型变现路径未验证，Qwen API实际收入仍不透明，应已包含在云估值内。<br><br>
+        <strong>差异 → ~$15-20/ADR</strong>
+      </p>
+    </div>
+  </div>
+
+  <h3>共识盈利预期(consensus estimates)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>指标</th>
+        <th class="num">FY26E (3/26止)</th>
+        <th class="num">FY27E</th>
+        <th class="num">FY28E</th>
+        <th class="num">CAGR</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>总收入 (¥bn)</td><td class="num">1,025</td><td class="num">1,135</td><td class="num">1,260</td><td class="num">+11%</td></tr>
+      <tr><td>云收入 (¥bn)</td><td class="num">175</td><td class="num">230</td><td class="num">295</td><td class="num">+30%</td></tr>
+      <tr><td>调整后EBITA (¥bn)</td><td class="num">100</td><td class="num">155</td><td class="num">210</td><td class="num">+45%</td></tr>
+      <tr><td>调整后EPS (¥)</td><td class="num">42</td><td class="num">62</td><td class="num">82</td><td class="num">+40%</td></tr>
+      <tr><td>FCF ($bn)</td><td class="num">10-12</td><td class="num">15-18</td><td class="num">22-26</td><td class="num">—</td></tr>
+    </tbody>
+  </table>
+  <p class="source-note">基于Bloomberg consensus 30+家投行平均数(2026/4/30)。EBITA和EPS的强反弹主要来自(1)即时零售亏损收窄；(2)AIDC扭亏；(3)云margin扩张。</p>
+
+  <h3>我对卖方观点的看法</h3>
+  <p>卖方共识$189基本与我的$190相符 — 这不是巧合，是因为<u>共识的Bull/Bear三情景加权刚好落在这里</u>。但有几点值得注意：</p>
+  <ul style="padding-left:20px;">
+    <li><strong>JPM的$245可能过激进</strong>。Alex Yao把Qwen独立估值$30+/ADR的逻辑站不住 — Qwen实际API收入还没公开披露，开源策略下变现路径不清晰。把这部分剔掉，JPM的电商+云核心估值大约$200-210，与其他多头一致。</li>
+    <li><strong>GS的$163可能过悲观</strong>。GS对即时零售的悲观假设(战争延续到FY28)概率不超过20% — 监管已经在2025年底点名"无序补贴"，市场最早在2026下半年开始默契降速。</li>
+    <li><strong>真正的alpha来自情景切换</strong>。如果你认为现在分歧的3个点中至少2个会朝多头方向解决(云高倍数 + 即时零售FY27减亏)，那$200-220目标价是合理的；如果3个全部朝多头，$240+。</li>
+    <li><strong>注意目标价集中下调期</strong>。Q3财报后(2026/3/18)Jefferies从$225降至$212、Barclays从$190降至$186 — 这是<u>分析师对短期EPS下修的反应</u>，而不是长期thesis变化。这种"目标价小幅下修但维持买入"的pattern通常预示股价6-12个月后的反弹机会。</li>
+  </ul>
+</section>
+
+<!-- ⑧ THESIS -->
+<section id="thesis">
+  <h2>⑧ 多空论点合成</h2>
+
+  <div class="bull-bear">
+    <div class="bull">
+      <h3>★ Bull Case</h3>
+      <ul>
+        <li><strong>云的二次起飞被严重低估。</strong> AI产品三位数增速持续10季，36%整体增速接近2018年高点；Qwen成为中文模型事实标杆。如果按6x P/S单估，云一项就值 ~$60/ADR。</li>
+        <li><strong>组织复归提升执行效率。</strong> 吴泳铭收回拆分计划，资源集中到"AI+电商"双主轴，2024-2025已经看到决策效率明显提升。</li>
+        <li><strong>电商竞争格局趋稳。</strong> PDD自身增速从90%坠落到12%，监管对食品/医药品类清退仍利好阿里高质量货盘。淘天CMR持续+5%是稳态信号。</li>
+        <li><strong>$425亿净现金 + 持续回购 = 极强下行保护。</strong> 18个月回购缩股6%，按当前节奏FY27前再缩~3-4%；分红已正常化。</li>
+        <li><strong>AIDC接近扭亏。</strong> 国际业务亏损同比腰斩，AliExpress Choice UE改善 + Lazada/Trendyol本地化壁垒。</li>
+        <li><strong>政策端见底。</strong> 2024年罚款已结清，2025年起监管重回支持平台经济基调。</li>
+      </ul>
+    </div>
+    <div class="bear">
+      <h3>✗ Bear Case</h3>
+      <ul>
+        <li><strong>即时零售可能是无底洞。</strong> 美团/京东/阿里三方都有现金弹药，价格战可能延续到2027；本季已烧¥50bn换3亿用户，留存度成疑。</li>
+        <li><strong>Capex回报率有重大不确定性。</strong> $525亿三年投入是历史最大豪赌，如果云需求增速2027放缓而设备折旧到位，short-term margin再压缩。</li>
+        <li><strong>地缘政治尾部风险。</strong> 中美科技脱钩升级 / 台海 / 美国对华芯片限制(影响阿里云训练算力)都是显著tail risk。</li>
+        <li><strong>淘天份额持续被PDD和抖音蚕食。</strong> 虽然增速企稳，但绝对GMV份额从2020年的~60%已降到~45%，这个长期下行趋势没有反转。</li>
+        <li><strong>Qwen商业化路径未证伪。</strong> 开源模型的tokens变现能力低于OpenAI/Anthropic封闭路径，Qwen独立估值的故事还没数据支撑。</li>
+        <li><strong>Holdco折扣可能扩大。</strong> 一旦市场focus回到"中国监管+复杂结构"，10-20%折扣可能变25%。</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>我的判断</h3>
+  <p>这是一个 <strong>"右尾大、左尾有限"</strong> 的非对称机会。下行有$425亿净现金和持续回购铺底(隐含底部$110-120左右);上行靠云重估 + 即时零售烧钱周期结束 + AIDC扭亏三个独立催化剂。<strong>不是PDD那种"超低估值+高速增长"的简单价值股，而是"复杂业务组合+隐藏资产(云/Qwen/Ant)被低估"的SOTP机会。</strong></p>
+
+  <p><strong>建仓节奏建议</strong>：</p>
+  <ul style="padding-left:20px;">
+    <li>第一档(40%)：当前价位 ~$140 附近建仓 — 已经在年线和上升通道下沿。</li>
+    <li>第二档(30%)：$125附近 — 如果即时零售战恶化或Q4 FY26财报再miss，市场会过度反应。</li>
+    <li>第三档(30%)：$110-115 — bear case价位，需要bear触发器(地缘/监管)，但这正是建仓最好的时点。</li>
+  </ul>
+
+  <p><strong>持仓时间</strong>：18-24个月。关键观察点(catalysts)：</p>
+  <ol style="padding-left:20px;">
+    <li>2026年5月13日 — FY26Q4(March 2026)业绩 — 看云增速能否维持30%+</li>
+    <li>2026年8月 — 即时零售战是否出现"市场分割默契"</li>
+    <li>2026下半年 — Qwen API商业化数据披露</li>
+    <li>2027年Q1 — AIDC是否如期扭亏</li>
+    <li>2027年Q2 — 蚂蚁IPO进展</li>
+  </ol>
+</section>
+
+<div class="footer">
+  <p><strong>免责声明</strong>：本分析仅供研究讨论，非投资建议。所有数据基于公开披露 + 卖方研究 + 我个人估算。建议自行核实关键数据再做决策。</p>
+  <p style="margin-top:8px;">数据来源：阿里巴巴IR (FY26Q3 公告 2026-03-18)、SCMP、CNBC、Bloomberg、TechBuzz China、SeekingAlpha、Morgan Stanley/DBS/CMBI 研报、StockAnalysis.com、MarketBeat consensus。</p>
+  <p style="margin-top:8px;">分析日期: 2026-05-06 · 当前价 $141 · 12个月目标 $190 · BUY</p>
+</div>
+
+</div>
+
+<script>
+// Chart.js global config
+Chart.defaults.color = '#8b949e';
+Chart.defaults.borderColor = '#30363d';
+Chart.defaults.font.family = '-apple-system, "Helvetica Neue", "PingFang SC", sans-serif';
+
+// Revenue Mix
+new Chart(document.getElementById('revMixChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['淘天集团','云智能','AIDC国际','本地生活+闪购','菜鸟','数媒+其他'],
+    datasets: [{
+      data: [159.3, 43.3, 39.2, 25, 28, 7],
+      backgroundColor: ['#ff6a00','#58a6ff','#3fb950','#d29922','#a371f7','#8b949e'],
+      borderColor: '#161b22',
+      borderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'right', labels:{boxWidth:12, font:{size:11}}}}
+  }
+});
+
+// Growth Rates
+new Chart(document.getElementById('growthChart'), {
+  type: 'bar',
+  data: {
+    labels: ['本地+闪购','云智能','淘天','AIDC','菜鸟','数媒'],
+    datasets: [{
+      label: 'YoY 增速 %',
+      data: [56, 36.4, 6, 3.8, 8, 5],
+      backgroundColor: (ctx) => {
+        const v = ctx.parsed?.y ?? ctx.raw;
+        if (v >= 30) return '#3fb950';
+        if (v >= 10) return '#58a6ff';
+        return '#8b949e';
+      },
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }},
+    scales: {
+      y: { beginAtZero: true, ticks: { callback: v => v + '%' }, grid: { color: '#21262d' }},
+      x: { grid: { display: false }}
+    }
+  }
+});
+
+// Revenue Trend
+new Chart(document.getElementById('revTrendChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Q2FY25','Q3FY25','Q4FY25','Q1FY26','Q2FY26','Q3FY26'],
+    datasets: [
+      {
+        label: '收入(¥bn)',
+        data: [236.5, 280.1, 236.5, 243.2, 247.8, 284.8],
+        backgroundColor: '#58a6ff',
+        borderRadius: 4,
+        yAxisID: 'y',
+      },
+      {
+        label: 'YoY 增速 %',
+        data: [5, 8, 7, 7, 5, 1.7],
+        type: 'line',
+        borderColor: '#ff6a00',
+        backgroundColor: '#ff6a00',
+        tension: 0.3,
+        yAxisID: 'y1',
+        pointRadius: 5,
+        pointHoverRadius: 7,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels:{boxWidth:12, font:{size:11}}}},
+    scales: {
+      y: { beginAtZero: true, ticks: { callback: v => '¥'+v }, grid: { color: '#21262d' }},
+      y1: { position: 'right', beginAtZero: true, grid: { display: false }, ticks: { callback: v => v + '%' }},
+      x: { grid: { display: false }}
+    }
+  }
+});
+
+// Cloud Margin
+new Chart(document.getElementById('cloudMarginChart'), {
+  type: 'line',
+  data: {
+    labels: ['Q2FY25','Q3FY25','Q4FY25','Q1FY26','Q2FY26','Q3FY26'],
+    datasets: [
+      {
+        label: '云收入增速 %',
+        data: [7, 11, 18, 26, 34, 36.4],
+        borderColor: '#3fb950',
+        backgroundColor: 'rgba(63,185,80,0.15)',
+        tension: 0.35,
+        fill: true,
+        yAxisID: 'y',
+        pointRadius: 5,
+      },
+      {
+        label: '云EBITA Margin %',
+        data: [9.5, 9.0, 8.5, 8.8, 8.6, 9.0],
+        borderColor: '#58a6ff',
+        tension: 0.3,
+        yAxisID: 'y1',
+        pointRadius: 4,
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels:{boxWidth:12, font:{size:11}}}},
+    scales: {
+      y: { beginAtZero: true, ticks: { callback: v => v + '%' }, grid: { color: '#21262d' }, title:{display:true, text:'增速%'}},
+      y1: { position: 'right', beginAtZero: true, max: 15, grid: { display: false }, ticks: { callback: v => v + '%' }, title:{display:true, text:'Margin%'}},
+      x: { grid: { display: false }}
+    }
+  }
+});
+
+// Analyst Target Prices
+new Chart(document.getElementById('analystChart'), {
+  type: 'bar',
+  data: {
+    labels: ['JP Morgan','Citi','Jefferies','Bernstein','Barclays','Morgan Stanley','Goldman Sachs'],
+    datasets: [{
+      label: '目标价 ($)',
+      data: [245, 217, 212, 200, 186, 165, 163],
+      backgroundColor: (ctx) => {
+        const v = ctx.parsed?.x ?? ctx.raw;
+        if (v >= 220) return '#3fb950';
+        if (v >= 180) return '#58a6ff';
+        return '#d29922';
+      },
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      annotation: {}
+    },
+    scales: {
+      x: {
+        beginAtZero: false,
+        min: 130, max: 260,
+        grid: { color: '#21262d' },
+        ticks: { callback: v => '$' + v }
+      },
+      y: { grid: { display: false }}
+    }
+  }
+});
+
+// Add current price line via plugin (custom draw)
+const analystChart = Chart.getChart('analystChart');
+if (analystChart) {
+  const origDraw = analystChart.draw.bind(analystChart);
+  analystChart.draw = function() {
+    origDraw();
+    const ctx = analystChart.ctx;
+    const xScale = analystChart.scales.x;
+    const x = xScale.getPixelForValue(141);
+    const top = analystChart.chartArea.top;
+    const bottom = analystChart.chartArea.bottom;
+    ctx.save();
+    ctx.strokeStyle = '#f85149';
+    ctx.setLineDash([5,5]);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, bottom);
+    ctx.stroke();
+    ctx.fillStyle = '#f85149';
+    ctx.font = '11px sans-serif';
+    ctx.fillText('现价 $141', x + 5, top + 12);
+    ctx.restore();
+  };
+  analystChart.update();
+}
+
+// PE Comp
+new Chart(document.getElementById('peCompChart'), {
+  type: 'bar',
+  data: {
+    labels: ['BABA', 'Tencent', 'Meituan', 'JD', 'PDD', 'Amazon (参照)','MSFT (参照)'],
+    datasets: [{
+      label: 'Forward P/E',
+      data: [19.5, 13.9, 25, 10, 9.4, 28, 28],
+      backgroundColor: ['#ff6a00','#a371f7','#d29922','#8b949e','#3fb950','#58a6ff','#58a6ff'],
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }},
+    scales: {
+      x: { beginAtZero: true, grid: { color: '#21262d' }, ticks: {callback: v => v + 'x'}},
+      y: { grid: { display: false }}
+    }
+  }
+});
+</script>
+</body>
+</html>

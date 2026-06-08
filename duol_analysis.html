@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DUOL · Q1 CY2026 投资分析 | 研究备忘</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#111a2e; --panel2:#16213a; --line:#1f2c47;
+    --ink:#e6ecf5; --mute:#8aa0c2; --accent:#58a6ff; --gold:#f0b950;
+    --green:#2ecc71; --red:#e74c3c; --amber:#f39c12;
+    --hl:#1c2a4a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .container{max-width:1180px;margin:0 auto;padding:32px 24px}
+  header.hero{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:32px}
+  .eyebrow{color:var(--accent);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+  h1{font-size:34px;font-weight:700;margin-top:8px;letter-spacing:-.01em}
+  h1 .ticker{color:var(--gold);font-family:"SF Mono","Menlo",monospace;font-weight:700}
+  .subtitle{color:var(--mute);font-size:15px;margin-top:6px}
+  .rating-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+  .pill{background:var(--panel);border:1px solid var(--line);padding:8px 14px;border-radius:999px;font-size:13px;color:var(--mute)}
+  .pill strong{color:var(--ink);margin-left:6px}
+  .pill.rating{background:linear-gradient(135deg,#1a2f56,#0f1c39);border-color:#2a4475}
+  .pill.rating strong{color:var(--gold)}
+  .pill.warn{border-color:#5a3a14;background:#2a1d0a}
+  .pill.warn strong{color:var(--amber)}
+
+  section{margin-bottom:48px}
+  h2{font-size:22px;font-weight:700;margin-bottom:14px;display:flex;align-items:baseline;gap:10px}
+  h2 .num{color:var(--accent);font-family:"SF Mono",monospace;font-size:14px}
+  h3{font-size:16px;font-weight:600;margin:18px 0 10px;color:var(--ink)}
+  p{color:#cdd7e8;margin-bottom:10px;font-size:14.5px}
+  p.lede{font-size:15.5px;color:var(--ink)}
+  ul{padding-left:22px;margin-bottom:10px}
+  ul li{color:#cdd7e8;margin-bottom:6px;font-size:14.5px}
+  strong{color:var(--ink)}
+  em{color:var(--gold);font-style:normal;font-weight:600}
+
+  .grid{display:grid;gap:14px}
+  .grid-4{grid-template-columns:repeat(4,1fr)}
+  .grid-3{grid-template-columns:repeat(3,1fr)}
+  .grid-2{grid-template-columns:repeat(2,1fr)}
+  @media (max-width:820px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr 1fr}}
+  @media (max-width:520px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}}
+
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .kpi .label{color:var(--mute);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+  .kpi .value{font-size:24px;font-weight:700;margin-top:6px;font-family:"SF Mono",monospace}
+  .kpi .delta{font-size:13px;margin-top:4px}
+  .delta.pos{color:var(--green)}
+  .delta.neg{color:var(--red)}
+  .delta.neu{color:var(--mute)}
+
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:13.5px}
+  thead{background:var(--panel2)}
+  th{padding:10px 12px;text-align:left;color:var(--mute);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line)}
+  td{padding:11px 12px;border-bottom:1px solid var(--line);color:#cdd7e8}
+  tr:last-child td{border-bottom:none}
+  td.num{font-family:"SF Mono",monospace;text-align:right}
+  tr.duol{background:rgba(88,166,255,0.08)}
+  tr.duol td{color:var(--ink);font-weight:500}
+  td.pos{color:var(--green)}
+  td.neg{color:var(--red)}
+  td.amber{color:var(--amber)}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px}
+  .panel-bull{border-color:#1d4a2a;background:linear-gradient(180deg,#0d1f15,var(--panel))}
+  .panel-bear{border-color:#4a1d24;background:linear-gradient(180deg,#1f0d11,var(--panel))}
+  .panel-bull h3{color:var(--green)}
+  .panel-bear h3{color:var(--red)}
+
+  .quote{border-left:3px solid var(--gold);padding:8px 16px;color:#cdd7e8;font-style:italic;margin:12px 0;background:rgba(240,185,80,0.04)}
+  .quote::before{content:'"';color:var(--gold);font-size:24px;margin-right:4px;font-weight:700;font-style:normal}
+
+  .chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;height:340px;position:relative}
+  .chart-title{font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:600}
+
+  .scenario{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+  .scenario.bear{border-top:3px solid var(--red)}
+  .scenario.base{border-top:3px solid var(--accent)}
+  .scenario.bull{border-top:3px solid var(--green)}
+  .scenario .tag{font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:700}
+  .scenario.bear .tag{color:var(--red)}
+  .scenario.base .tag{color:var(--accent)}
+  .scenario.bull .tag{color:var(--green)}
+  .scenario .px{font-size:32px;font-weight:700;font-family:"SF Mono",monospace;margin:6px 0}
+  .scenario .delta{font-size:14px}
+  .scenario ul{font-size:13px;padding-left:18px;margin-top:10px}
+
+  .sens-table th,.sens-table td{text-align:center;padding:8px 6px;font-family:"SF Mono",monospace}
+  .sens-table th{color:var(--accent)}
+  .sens-table .row-label{text-align:left;color:var(--mute);font-family:inherit}
+  .heat-1{background:rgba(231,76,60,0.18)}
+  .heat-2{background:rgba(243,156,18,0.18)}
+  .heat-3{background:rgba(46,204,113,0.12)}
+  .heat-4{background:rgba(46,204,113,0.22)}
+  .heat-5{background:rgba(46,204,113,0.35);color:#fff;font-weight:600}
+
+  .timeline{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap}
+  .stage{flex:1;min-width:200px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;border-left:3px solid var(--accent)}
+  .stage .lbl{font-size:11px;color:var(--accent);letter-spacing:.1em;font-weight:700;text-transform:uppercase}
+  .stage .px-tag{font-family:"SF Mono",monospace;font-size:18px;font-weight:700;margin-top:4px}
+  .stage .desc{font-size:13px;color:var(--mute);margin-top:4px}
+
+  .signal{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);margin-bottom:8px;font-size:14px}
+  .signal .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .signal.green .dot{background:var(--green)}
+  .signal.red .dot{background:var(--red)}
+  .signal.amber .dot{background:var(--amber)}
+
+  footer{border-top:1px solid var(--line);padding-top:24px;margin-top:48px;color:var(--mute);font-size:12.5px}
+  footer a{color:var(--accent);text-decoration:none;display:block;margin:4px 0}
+  footer a:hover{text-decoration:underline}
+  .disclaimer{margin-top:18px;font-size:11.5px;color:#5d738f;font-style:italic}
+
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin-bottom:32px;font-size:13px}
+  .toc strong{color:var(--accent);letter-spacing:.05em}
+  .toc a{color:#cdd7e8;text-decoration:none;margin-right:14px;display:inline-block;padding:2px 0}
+  .toc a:hover{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="hero">
+  <div class="eyebrow">Equity Research · Earnings Update</div>
+  <h1><span class="ticker">DUOL</span> · Duolingo, Inc.</h1>
+  <p class="subtitle">Q1 CY2026 财报后投资分析 · 报告日期 2026-05-06 · 财报日 2026-05-04</p>
+  <div class="rating-row">
+    <span class="pill rating">观点 <strong>Constructive · 分批建仓</strong></span>
+    <span class="pill">现价 <strong>$104</strong></span>
+    <span class="pill">12个月目标 <strong>$120 (基准) / $175 (牛市)</strong></span>
+    <span class="pill warn">风险 <strong>战略转向待验证</strong></span>
+    <span class="pill">市值 / EV <strong>$5.2B / $4.1B</strong></span>
+  </div>
+</header>
+
+<div class="toc">
+  <strong>目录 ·</strong>
+  <a href="#tldr">核心观点</a>
+  <a href="#snapshot">业绩快照</a>
+  <a href="#business">业务剖析</a>
+  <a href="#guide">管理层指引</a>
+  <a href="#comps">可比公司</a>
+  <a href="#dcf">DCF / 情景</a>
+  <a href="#analysts">卖方观点</a>
+  <a href="#bullbear">牛熊辩论</a>
+  <a href="#action">操作建议</a>
+</div>
+
+<!-- ============================ TL;DR ============================ -->
+<section id="tldr">
+  <h2><span class="num">01</span>核心观点（TL;DR）</h2>
+  <p class="lede">DUOL Q1 实际数据全面 beat（收入 +27%, DAU +21%, FCF margin 50%+），但<em>管理层主动放缓变现</em>——Q2 bookings 指引仅 +6%、全年 bookings 仅 +10.5%——市场以一次 -14% 砍仓兑现"故事破了"的悲观情形。</p>
+  <p class="lede">从历史峰值 $544 跌至 $104（-81%），估值已经从极端泡沫（EV/Sales 25x+）回归到 <em>EV/Sales 3.4x · EV/EBITDA 13x · FCF yield 6.8%</em>——这对一家仍在 +27% 增长 + 50% FCF margin 的公司是合理偏低的水平。</p>
+  <p class="lede"><strong>结论</strong>：不是 all-in 时点，但已进入有意义的建仓区。建议<em> 3 批分仓</em>：现在 1/3 仓位，Q2 财报后看 DAU/bookings 数据再加 1/3，Max 货币化数据出来后定第三批。</p>
+</section>
+
+<!-- ============================ Q1 Snapshot ============================ -->
+<section id="snapshot">
+  <h2><span class="num">02</span>Q1 CY2026 业绩快照</h2>
+
+  <div class="grid grid-4">
+    <div class="kpi"><div class="label">收入</div><div class="value">$291.9M</div><div class="delta pos">+27% YoY · beat 1%</div></div>
+    <div class="kpi"><div class="label">Bookings</div><div class="value">$308.5M</div><div class="delta amber" style="color:var(--amber)">+14% YoY · 减速</div></div>
+    <div class="kpi"><div class="label">DAU</div><div class="value">56.5M</div><div class="delta pos">+21% YoY</div></div>
+    <div class="kpi"><div class="label">付费用户</div><div class="value">12.5M</div><div class="delta pos">+21% YoY</div></div>
+    <div class="kpi"><div class="label">Adj EBITDA</div><div class="value">$83.4M</div><div class="delta pos">28.6% margin · beat 13%</div></div>
+    <div class="kpi"><div class="label">GAAP EPS</div><div class="value">$0.89</div><div class="delta pos">vs $0.76 cons · beat 17%</div></div>
+    <div class="kpi"><div class="label">自由现金流</div><div class="value">$147.8M</div><div class="delta pos">50.6% margin</div></div>
+    <div class="kpi"><div class="label">毛利率</div><div class="value">73.0%</div><div class="delta neu">→ 69% by 年底</div></div>
+  </div>
+
+  <h3>为什么超预期还跌 14%？</h3>
+  <p>所有"已实现"指标漂亮，但<em>所有前瞻指标在崩</em>。Bookings 是 SaaS/订阅类公司最领先的真实需求指标，收入受递延确认平滑——bookings 减速意味着<strong>当下用户付费意愿在下降</strong>。市场担心的不是当季，是 H2 和 FY27 的故事。</p>
+
+  <div class="chart-wrap" style="margin-top:14px">
+    <div class="chart-title">前瞻 vs 已实现：市场为何不买账</div>
+    <canvas id="growthChart"></canvas>
+  </div>
+</section>
+
+<!-- ============================ Business Deep Dive ============================ -->
+<section id="business">
+  <h2><span class="num">03</span>业务深度剖析（决定长期价值的四个轴）</h2>
+
+  <div class="grid grid-2">
+    <div class="panel">
+      <h3>① AI 内容引擎已规模化（核心 Bull 论据）</h3>
+      <ul>
+        <li><strong>Q1 单季度发布 20,500 个 course units</strong>——两年前每季度产能的 ~10 倍</li>
+        <li>9 大主语言已达 <strong>CEFR B2（职业熟练度）</strong>覆盖</li>
+        <li>这是通用 LLM 难以复刻的"教学路径化"内容护城河</li>
+      </ul>
+      <div class="quote">我们要把更多 AI 这种"原料"放进产品里。 — CFO Gilian Munson</div>
+    </div>
+
+    <div class="panel">
+      <h3>② 战略转向：用户增长 &gt; 货币化</h3>
+      <ul>
+        <li>21% DAU + 21% 付费用户 → <strong>ARPDAU 基本持平</strong></li>
+        <li>主动延长免费试用、降低 paywall 摩擦</li>
+        <li>CFO 承认 <em>"top-of-funnel growth 大体持平"</em>——最值得警惕的信号</li>
+        <li>逻辑：先做大体量到 Asia 等渗透率低的地区，再用 B2/C1 + Max 重启 ARPU</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h3>③ Max & Speaking：变现期权未兑现</h3>
+      <ul>
+        <li>Video Call 让"用户每月口语单词数翻倍"——产品力强</li>
+        <li>但开始给 Super 用户也开放 video call → 暗示<strong> Max 当前价值锚定弱、转化率低于预期</strong></li>
+        <li>Max 是市场愿意给高估值的核心理由——目前仍"experimental"，是估值压缩的根因</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h3>④ 现金流机器属性未变（下行保护）</h3>
+      <ul>
+        <li>FCF margin <strong>50.6%</strong>（!），全年 guide $350M+</li>
+        <li>$400M 回购授权，Q1 已回购 ~514K 股（~1% 流通股）</li>
+        <li>$1B+ 净现金，<strong>EV/Mkt Cap = 80%</strong>——估值实际更便宜</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ Guidance ============================ -->
+<section id="guide">
+  <h2><span class="num">04</span>管理层指引解读</h2>
+
+  <table>
+    <thead>
+      <tr><th>指标</th><th>2月 FY26 guide</th><th>5月 FY26 guide（新）</th><th>YoY</th><th>解读</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Bookings</td><td class="num">$1.28B</td><td class="num">$1.28B（重申）</td><td class="num amber">+10.5%</td><td>没下调，但市场期待"用户增长见效后上调"</td></tr>
+      <tr><td>收入</td><td class="num">$1.205B</td><td class="num">$1.205B（重申）</td><td class="num pos">+16.1%</td><td>递延曲线稳，收入波动小于 bookings</td></tr>
+      <tr><td>Adj EBITDA</td><td class="num">~$300M</td><td class="num pos">$310M（小幅上调）</td><td class="num pos">25.7% margin</td><td>成本控制好于自己 guide——诚意，但解决不了 bookings 焦虑</td></tr>
+      <tr><td>毛利率轨迹</td><td class="num">—</td><td class="num">73% → 71% → <span class="amber">69% (YE)</span></td><td class="num neg">收缩 ~400bps</td><td>AI 用量上升嵌入成本端</td></tr>
+      <tr><td>FCF</td><td class="num">—</td><td class="num pos">&gt; $350M</td><td class="num">~29% margin</td><td>极强；下行保护核心</td></tr>
+      <tr class="duol"><td>Q2 Bookings YoY</td><td class="num">—</td><td class="num neg">~+6%</td><td class="num neg">大减速</td><td>归因高基数（去年 energy + Super 涨价）</td></tr>
+    </tbody>
+  </table>
+
+  <h3>指引的"潜台词"</h3>
+  <ul>
+    <li>管理层<strong>对"用户增长策略"在 H2 兑现的信心很强</strong>——否则不会重申 bookings</li>
+    <li>但<em>没有上调任何前瞻指标</em>——他们也不确定货币化恢复时点</li>
+    <li>EBITDA 微调是为了告诉市场"我们没失控"——是诚意，但解决不了核心焦虑</li>
+  </ul>
+
+  <div class="chart-wrap" style="margin-top:14px">
+    <div class="chart-title">收入与 EBITDA 轨迹（FY24A-FY26E）</div>
+    <canvas id="trajChart"></canvas>
+  </div>
+</section>
+
+<!-- ============================ Comps ============================ -->
+<section id="comps">
+  <h2><span class="num">05</span>可比公司分析（May 2026）</h2>
+  <p>选取三类 peers：(a) 消费订阅成熟期（NFLX/SPOT）、(b) DAU 驱动型（RBLX/MTCH）、(c) Edtech 同业（CHGG/COUR——CHGG 是 AI 时代的"反面教材"）。</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>公司</th><th>Mkt Cap</th><th>Rev Growth</th><th>EBITDA Margin</th>
+        <th>EV/Rev (NTM)</th><th>EV/EBITDA (NTM)</th><th>Fwd P/E</th><th>FCF Yield</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="duol">
+        <td><strong>DUOL</strong></td><td class="num">$5.2B</td><td class="num pos">+27%</td><td class="num pos">28.6%</td>
+        <td class="num">3.4x</td><td class="num">~13x</td><td class="num">38x</td><td class="num pos">6.8%</td>
+      </tr>
+      <tr>
+        <td>SPOT (Spotify)</td><td class="num">$91.8B</td><td class="num">+15%</td><td class="num">~12%</td>
+        <td class="num">5.3x</td><td class="num">30x</td><td class="num">29x</td><td class="num">~3%</td>
+      </tr>
+      <tr>
+        <td>NFLX (Netflix)</td><td class="num">$387.6B</td><td class="num">+12%</td><td class="num">~30%</td>
+        <td class="num">8.5x</td><td class="num">27x</td><td class="num">30x</td><td class="num">~3.5%</td>
+      </tr>
+      <tr>
+        <td>RBLX (Roblox)</td><td class="num">$34.1B</td><td class="num">+22%</td><td class="num neg">负值</td>
+        <td class="num">8.0x</td><td class="num neg">62x*</td><td class="num neg">N/M</td><td class="num">~1%</td>
+      </tr>
+      <tr>
+        <td>MTCH (Match)</td><td class="num">$8.6B</td><td class="num neg">+2%</td><td class="num">~36%</td>
+        <td class="num">2.4x</td><td class="num">11x</td><td class="num">14x</td><td class="num pos">~10%</td>
+      </tr>
+      <tr>
+        <td>COUR (Coursera)</td><td class="num">$1.4B</td><td class="num">+5%</td><td class="num">~3%</td>
+        <td class="num">1.5x</td><td class="num">N/M</td><td class="num">90x+</td><td class="num neg">~0%</td>
+      </tr>
+      <tr>
+        <td>CHGG (Chegg) <span class="amber">⚠ 警示</span></td><td class="num">~$0.1B</td><td class="num neg">-37%</td><td class="num neg">负值</td>
+        <td class="num neg">0.4x</td><td class="num neg">N/M</td><td class="num neg">N/M</td><td class="num">N/M</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size:12px;color:var(--mute);margin-top:8px">* RBLX EV/EBITDA 用 forward NTM 估计；CHGG 在 ChatGPT 冲击下 EV/Sales 已坍缩到 0.4x，是 AI 颠覆下的尾部情形参考</p>
+
+  <h3>读出来三件事</h3>
+  <ol style="padding-left:20px;color:#cdd7e8;font-size:14.5px">
+    <li><strong>DUOL 增长 + 利润率组合在表中独一档</strong>——27% 增长 + 28.6% EBITDA margin + 50% FCF margin，没有第二家</li>
+    <li><strong>EV/Rev 3.4x 在表中位于最低分位</strong>，仅高于已破产的 CHGG/低增长的 MTCH——对+27% 增长来说是<em>显著低估</em></li>
+    <li>但<strong>市场把 DUOL 在向 CHGG 端定价</strong>——担心"AI 颠覆 edtech"。这个担忧是否成立 = 整个 thesis 的关键</li>
+  </ol>
+
+  <div class="chart-wrap" style="margin-top:14px">
+    <div class="chart-title">EV/Sales (NTM) vs Revenue Growth — DUOL 估值显著偏低于自身增速</div>
+    <canvas id="compsChart"></canvas>
+  </div>
+</section>
+
+<!-- ============================ DCF ============================ -->
+<section id="dcf">
+  <h2><span class="num">06</span>DCF 模型与情景分析</h2>
+
+  <h3>核心假设</h3>
+  <table>
+    <thead>
+      <tr><th>FY</th><th>Revenue</th><th>YoY</th><th>EBITDA Margin</th><th>FCF Margin</th><th>FCF ($M)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>FY26 (guide)</td><td class="num">$1,205M</td><td class="num pos">+16%</td><td class="num">25.7%</td><td class="num">29%</td><td class="num">$350</td></tr>
+      <tr><td>FY27E</td><td class="num">$1,422M</td><td class="num pos">+18%</td><td class="num">28%</td><td class="num">32%</td><td class="num">$455</td></tr>
+      <tr><td>FY28E</td><td class="num">$1,664M</td><td class="num pos">+17%</td><td class="num">30%</td><td class="num">33%</td><td class="num">$549</td></tr>
+      <tr><td>FY29E</td><td class="num">$1,897M</td><td class="num pos">+14%</td><td class="num">32%</td><td class="num">34%</td><td class="num">$645</td></tr>
+      <tr><td>FY30E</td><td class="num">$2,106M</td><td class="num">+11%</td><td class="num">34%</td><td class="num">35%</td><td class="num">$737</td></tr>
+      <tr><td>FY31E (Terminal)</td><td class="num">$2,275M</td><td class="num">+8%</td><td class="num">35%</td><td class="num">35%</td><td class="num">$796</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:13px;color:var(--mute);margin-top:8px">关键假设：WACC 10% · Terminal exit 12x EBITDA · 净现金 $1.0B 加回 · 流通股 ~50M</p>
+
+  <h3>三情景估值</h3>
+  <div class="grid grid-3">
+    <div class="scenario bear">
+      <div class="tag">BEAR · 30%</div>
+      <div class="px">$72</div>
+      <div class="delta neg">-31% vs $104</div>
+      <ul>
+        <li>WACC 11%, exit 10x</li>
+        <li>FY27 增长仅 +10%</li>
+        <li>毛利率持续压到 65%</li>
+        <li>Max 货币化失败</li>
+        <li>AI 替代加速</li>
+      </ul>
+    </div>
+    <div class="scenario base">
+      <div class="tag">BASE · 50%</div>
+      <div class="px">$120</div>
+      <div class="delta pos">+15% vs $104</div>
+      <ul>
+        <li>WACC 10%, exit 12x</li>
+        <li>H2 bookings 软着陆</li>
+        <li>FY27 增长 +18% 重启</li>
+        <li>EBITDA margin 30% by FY28</li>
+        <li>FCF $500M+ FY27</li>
+      </ul>
+    </div>
+    <div class="scenario bull">
+      <div class="tag">BULL · 20%</div>
+      <div class="px">$175</div>
+      <div class="delta pos">+68% vs $104</div>
+      <ul>
+        <li>WACC 9%, exit 16x</li>
+        <li>Max 转化率突破</li>
+        <li>bookings 重回 +20%+</li>
+        <li>EBITDA margin 35%</li>
+        <li>新品类（Math/Music/Chess）兑现</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3 style="margin-top:24px">敏感性矩阵：每股内在价值（基准 FCF 路径）</h3>
+  <table class="sens-table">
+    <thead>
+      <tr><th class="row-label">WACC ↓ / Exit Multiple →</th><th>10x</th><th>12x</th><th>14x</th><th>16x</th><th>18x</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="row-label">9.0%</td><td class="heat-3">$112</td><td class="heat-4">$135</td><td class="heat-4">$157</td><td class="heat-5">$180</td><td class="heat-5">$202</td></tr>
+      <tr><td class="row-label">9.5%</td><td class="heat-2">$106</td><td class="heat-3">$127</td><td class="heat-4">$148</td><td class="heat-4">$169</td><td class="heat-5">$190</td></tr>
+      <tr><td class="row-label" style="color:var(--accent);font-weight:600">10.0% (Base)</td><td class="heat-2">$100</td><td class="heat-3" style="font-weight:700">$120</td><td class="heat-4">$140</td><td class="heat-4">$160</td><td class="heat-5">$179</td></tr>
+      <tr><td class="row-label">10.5%</td><td class="heat-2">$95</td><td class="heat-3">$114</td><td class="heat-3">$132</td><td class="heat-4">$151</td><td class="heat-4">$170</td></tr>
+      <tr><td class="row-label">11.0%</td><td class="heat-1">$90</td><td class="heat-2">$108</td><td class="heat-3">$125</td><td class="heat-4">$143</td><td class="heat-4">$161</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12.5px;color:var(--mute);margin-top:8px">读法：当前 $104 在矩阵中位于 WACC 10.5-11% / Exit 10-12x 的悲观角落——市场已 price-in WACC ~11% 与较低出清倍数。</p>
+
+  <div class="chart-wrap" style="margin-top:14px">
+    <div class="chart-title">每股价值情景概率加权</div>
+    <canvas id="scenarioChart"></canvas>
+  </div>
+</section>
+
+<!-- ============================ Analyst Views ============================ -->
+<section id="analysts">
+  <h2><span class="num">07</span>卖方观点：分化的共识</h2>
+
+  <p class="lede">DUOL post-Q1 CY26的卖方反应是<em>典型的"故事重定价"过程</em> — 高位时期($300-500)给出高目标价的旧多头还没全部reset，post-Q1的实时反应则集中砍到$90-110区间。<strong>共识平均价是无意义的</strong>(被旧targets污染)，真正的信号在于"分化结构"和"新targets cluster在哪"。</p>
+
+  <div class="grid grid-4">
+    <div class="kpi"><div class="label">覆盖分析师</div><div class="value">~25</div><div class="delta neu">主流投行均覆盖</div></div>
+    <div class="kpi"><div class="label">共识评级</div><div class="value" style="color:var(--amber);">Hold</div><div class="delta neu">26% Buy / 53% Hold / 5% Sell</div></div>
+    <div class="kpi"><div class="label">Post-Q1 实时目标 (中位)</div><div class="value">$105</div><div class="delta neu">Q1后cluster</div></div>
+    <div class="kpi"><div class="label">目标价区间</div><div class="value">$85 – $450</div><div class="delta neg">分化度极高</div></div>
+  </div>
+
+  <h3>主要投行立场（Q1 CY26 财报后即时反应）</h3>
+  <table>
+    <thead>
+      <tr><th>投行</th><th>评级</th><th>目标价</th><th>变化</th><th>关键论点</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>UBS</strong> <span class="amber">⚠老多头</span></td><td>Buy</td><td class="num">$450</td><td class="num neg">$500→$450</td><td>仍在高位区间。基于"AI+教育长坡厚雪"原始论点，但目标价已被多次小幅下修，是<em>最后未reset</em>的旧多头之一。</td></tr>
+      <tr><td><strong>Goldman Sachs</strong></td><td>Neutral</td><td class="num">$250</td><td class="num neg">$425→$250</td><td>已大幅下修。认可AI内容产能，但担心通用LLM对"语言学习"作为独立品类的颠覆。</td></tr>
+      <tr><td><strong>BofA (旧)</strong></td><td>Buy → Neutral</td><td class="num">$250→$103</td><td class="num neg">post-Q1降级</td><td>Curtis Nagle在Q1后将评级从Buy下调至Neutral，目标价从$250砍到$103，跟随实际财报数据走。</td></tr>
+      <tr><td><strong>Wells Fargo</strong></td><td>Equal Weight</td><td class="num">$160</td><td class="num neg">$185→$160</td><td>关注top-of-funnel减速。"先观察策略转向是否兑现再调整"。</td></tr>
+      <tr><td><strong>Evercore ISI</strong> <span class="amber">⚠最新cut</span></td><td>In Line</td><td class="num">$97</td><td class="num neg">$114→$97</td><td>Q1后两天即砍价。明确表示"等待DAU/MAU加速的实证再变得constructive"。</td></tr>
+      <tr><td><strong>JP Morgan</strong></td><td>Neutral</td><td class="num">$92</td><td class="num neg">post-Q1调整</td><td>Q1后调至Neutral，目标价$92。强调"战略转向意味着至少3-4个季度看不到ARPU提升"。</td></tr>
+      <tr><td><strong>DA Davidson</strong></td><td>Neutral</td><td class="num">$90</td><td class="num pos">$85→$90</td><td>小幅上调反映Q1 EBITDA beat，但维持Neutral。"管理层执行能力没问题，但故事需要重塑"。</td></tr>
+      <tr><td><strong>Citi</strong></td><td>Neutral</td><td class="num">$85</td><td class="num neg">post-Q1降目标</td><td>最保守的cluster之一。"Max货币化失败概率上升，毛利率进一步收缩"。</td></tr>
+    </tbody>
+  </table>
+
+  <div class="chart-wrap" style="margin-top:14px">
+    <div class="chart-title">主要投行目标价区间 — 现价 $104 (红线)</div>
+    <canvas id="duolAnalystChart"></canvas>
+  </div>
+
+  <h3>关键观察：共识本身在重新定价</h3>
+
+  <div class="grid grid-2">
+    <div class="panel panel-bull">
+      <h3>"老多头" 阵营 (估值 $250-450)</h3>
+      <ul>
+        <li><strong>论点未变</strong>：AI内容产能 + 长期渗透率 + Max潜力</li>
+        <li><strong>问题</strong>：他们在2024-2025年上修目标价时基于的"+30% bookings持续"假设已不成立</li>
+        <li><strong>下修速率</strong>：从$500 → $450的小步下调显示<em>不愿放弃论点</em>，但每一份新数据都在挤压</li>
+        <li><strong>预测</strong>：未来2-3个季度可能继续被动下调到$200-250区间</li>
+      </ul>
+    </div>
+    <div class="panel panel-bear">
+      <h3>"新中性" 阵营 (估值 $85-115)</h3>
+      <ul>
+        <li><strong>共同模型假设</strong>：bookings结构性减速到+10-12%、毛利率压到65-68%、Max不会大规模货币化</li>
+        <li><strong>关键关注点</strong>：Q2/Q3的DAU与top-of-funnel数据 — 一旦DAU回到+22%+，估值会快速重估</li>
+        <li><strong>立场含义</strong>：当前价位已基本反映他们的base case，<em>没有显著下行空间</em>但也没有上行催化剂</li>
+        <li><strong>预测</strong>：如果H2策略转向有效，这批分析师将率先上修(从$95→$130-150)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Post-Q1 卖方反应的"潜台词"</h3>
+  <ul>
+    <li><strong>没有任何分析师下调到Sell评级</strong> — 即使最悲观的Citi $85也只是Neutral。这意味着<em>没人认为DUOL是CHGG式的崩塌</em>，分歧只在"何时再加速"。</li>
+    <li><strong>9.7%的盘后跌幅其实克制</strong> — 高位股票财报guide miss通常跌20%+，市场已经price-in了悲观情形。</li>
+    <li><strong>post-Q1 cluster ($85-105)与现价 $104吻合</strong> — 这意味着市场已基本完成"故事重定价"，下一个6-12个月主要看催化剂方向。</li>
+    <li><strong>Evercore的"等待DAU证据"是教科书式的卖方观望</strong> — 他们会等2-3个季度数据，等到confirmation时股价已经反弹$30-40。<em>个人投资者的优势恰恰是不需要等他们confirm</em>。</li>
+  </ul>
+
+  <h3>共识盈利预期 (Consensus Estimates · Post Q1)</h3>
+  <table>
+    <thead>
+      <tr><th>指标</th><th>FY26E</th><th>FY27E</th><th>FY28E</th><th>3年CAGR</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Bookings ($M)</td><td class="num">$1,283</td><td class="num">$1,475</td><td class="num">$1,720</td><td class="num">+12%</td></tr>
+      <tr><td>Revenue ($M)</td><td class="num">$1,205</td><td class="num">$1,420</td><td class="num">$1,660</td><td class="num">+17%</td></tr>
+      <tr><td>Adj EBITDA ($M)</td><td class="num">$310</td><td class="num">$405</td><td class="num">$510</td><td class="num">+28%</td></tr>
+      <tr><td>EBITDA Margin %</td><td class="num">25.7%</td><td class="num">28.5%</td><td class="num">30.7%</td><td class="num pos">+500bps</td></tr>
+      <tr><td>FCF ($M)</td><td class="num">$365</td><td class="num">$465</td><td class="num">$565</td><td class="num">+25%</td></tr>
+      <tr><td>GAAP EPS ($)</td><td class="num">$3.20</td><td class="num">$4.85</td><td class="num">$6.50</td><td class="num">+39%</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12.5px;color:var(--mute);margin-top:8px">基于post-Q1的Bloomberg consensus(15-25家分析师)。<em>注意</em>：FY27E bookings +15% YoY隐含H2 2026开始重新加速 — 这是consensus的<strong>关键暗含假设</strong>。如果H2不见加速，FY27估计需要进一步下修。</p>
+
+  <h3 style="margin-top:18px">我对卖方的判断</h3>
+  <p style="background:rgba(240,185,80,0.04);border-left:3px solid var(--gold);padding:14px 16px;border-radius:6px;">
+  我的<strong>$120基准目标价 + $175牛市目标</strong>夹在两个阵营中间——略高于"新中性"cluster ($90-110)，但远低于"老多头"剩余的$250-450。这反映我的<em>非对称判断</em>：
+  </p>
+  <ul>
+    <li>对bookings结构性减速的担忧我同意 — 因此base case我没有给"老多头"那种高目标价。</li>
+    <li>但对FCF属性 + 净现金 + 50%+ FCF margin的极端低估，"新中性"陣營低估了 — 当前$104相当于<u>把DUOL定价为"零增长且毛利持续压缩"的成熟订阅公司</u>，与+27%实际增速明显错配。</li>
+    <li><strong>关键：押注的不是"共识翻多"，而是"data points逐步好转"</strong>。每一次Q2/Q3 DAU加速、每一次Max披露、每一次bookings上调，都会推动新中性阵营从$95上修到$120-150，老多头从$450下修到$250 — 两者夹击形成新共识 ~$170-200。</li>
+    <li>这比单纯估"卖方共识方向"更重要：<em>赔率不取决于卖方对错，取决于业务数据vs卖方共识的差值方向</em>。我认为业务数据会比当前post-Q1悲观共识更好，所以做多。</li>
+  </ul>
+</section>
+
+<!-- ============================ Bull / Bear ============================ -->
+<section id="bullbear">
+  <h2><span class="num">08</span>牛 / 熊辩论</h2>
+  <div class="grid grid-2">
+    <div class="panel panel-bull">
+      <h3>BULL CASE</h3>
+      <ul>
+        <li><strong>估值已极度反映悲观</strong>——EV/Sales 从 25x+ 跌到 3.4x，FCF yield 6.8% 罕见</li>
+        <li>+27% 收入增长 + 50% FCF margin 的组合在公开市场<em>独一档</em></li>
+        <li>AI 内容产能 10x 释放——B2/C1 内容是 ChatGPT 难以路径化的差异</li>
+        <li>Max 一旦定价/转化突破 → ARPU 二次跃迁</li>
+        <li>$1B 净现金 + $400M 回购 = 极强下行保护</li>
+        <li>新品类（Math, Music, Chess）尚未货币化——是免费选项</li>
+        <li>Asia 渗透率低 → top-of-funnel 重新加速的可能</li>
+      </ul>
+    </div>
+    <div class="panel panel-bear">
+      <h3>BEAR CASE</h3>
+      <ul>
+        <li><strong>AI 通用模型蚕食"语言学习"作为独立品类</strong>——CHGG 是前车之鉴</li>
+        <li>Top-of-funnel "about flat" — 是结构性还是周期性？无法证明</li>
+        <li>战略转向 = 至少未来 3-4 个季度 ARPU 难提升</li>
+        <li>毛利率轨迹 73% → 69% — AI 成本嵌入持续</li>
+        <li>Max 给 Super 试开 → 暗示 Max 定价权弱、未达预期</li>
+        <li>21 家分析师持有评级 = 市场已经放手</li>
+        <li>UBS PT 从 $285 砍到 $125；BofA 降级 — 卖方共识在重新定价"长期增长"</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ Action Plan ============================ -->
+<section id="action">
+  <h2><span class="num">09</span>操作建议（长期持仓视角）</h2>
+
+  <h3>3 批建仓节奏</h3>
+  <div class="timeline">
+    <div class="stage">
+      <div class="lbl">第 1 批 · 现在</div>
+      <div class="px-tag">~$104 · 1/3 仓</div>
+      <div class="desc">估值已反映悲观，下行空间约 -30%、上行 +60%+——非对称性偏正向</div>
+    </div>
+    <div class="stage">
+      <div class="lbl">第 2 批 · Q2 财报后</div>
+      <div class="px-tag">8 月初 · 1/3 仓</div>
+      <div class="desc">需观察：DAU 加速到 ≥22%、bookings ≥10%、毛利率稳在 70%+</div>
+    </div>
+    <div class="stage">
+      <div class="lbl">第 3 批 · Max 数据出来</div>
+      <div class="px-tag">Q3 / 战略日 · 1/3 仓</div>
+      <div class="desc">需要 Max ARPU/渗透率披露 + bookings 上调 = thesis 真正兑现</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:24px">观测信号清单</h3>
+  <div class="signal green"><div class="dot"></div><strong>加仓信号：</strong>Q2 DAU 增长 ≥22%（top-of-funnel 反弹）</div>
+  <div class="signal green"><div class="dot"></div><strong>加仓信号：</strong>FY26 bookings guide 上调（从重申 → 上调）</div>
+  <div class="signal green"><div class="dot"></div><strong>加仓信号：</strong>Max 单独披露 ARPU/渗透率，且转化率 ≥10%</div>
+  <div class="signal amber"><div class="dot"></div><strong>持仓不动：</strong>毛利率稳定在 69-71%（AI 成本可控）</div>
+  <div class="signal amber"><div class="dot"></div><strong>持仓不动：</strong>FCF margin 维持 30%+（现金流机器属性未破）</div>
+  <div class="signal red"><div class="dot"></div><strong>砍仓 / 退出：</strong>连续两季 DAU &lt;18% 且 bookings &lt;10%（故事破了）</div>
+  <div class="signal red"><div class="dot"></div><strong>砍仓 / 退出：</strong>Max tier 被 EOL 或合并回 Super（货币化失败）</div>
+  <div class="signal red"><div class="dot"></div><strong>砍仓 / 退出：</strong>FY27 收入增速指引 &lt;10%（结构性减速）</div>
+
+  <h3 style="margin-top:24px">仓位建议（参考）</h3>
+  <p>对于一个长期股票组合（你的画像），DUOL 在<em>建满3批后</em>合理仓位约为<strong> 2-4%</strong>——这是单只 thesis 较激进、AI 颠覆风险存在但估值非对称性吸引的标的应有的体量。不建议作为核心持仓（&gt;5%），保留资金以应对真破坏情形。</p>
+</section>
+
+<!-- ============================ Sources ============================ -->
+<footer>
+  <strong style="color:var(--accent);font-size:13px;letter-spacing:.08em">来源 / SOURCES</strong>
+  <a href="https://investors.duolingo.com/news-releases/news-release-details/duolingo-reports-first-quarter-2026-results" target="_blank">Duolingo Q1 2026 Press Release · Investor Relations</a>
+  <a href="https://www.fool.com/earnings/call-transcripts/2026/05/04/duolingo-duol-q1-2026-earnings-transcript/" target="_blank">Q1 2026 Earnings Call Transcript · Motley Fool</a>
+  <a href="https://finance.yahoo.com/markets/stocks/articles/duolingo-nasdaq-duol-q1-cy2026-211736557.html" target="_blank">DUOL Q1 CY2026 Beat But Stock Drops 13.9% · Yahoo Finance</a>
+  <a href="https://markets.financialcontent.com/stocks/article/stockstory-2026-5-5-duol-q1-deep-dive-product-investments-and-ai-content-drive-user-growth-amid-margin-pressure" target="_blank">DUOL Q1 Deep Dive · StockStory</a>
+  <a href="https://www.tikr.com/blog/duolingo-stock-is-down-45-in-2026-why-analysts-still-see-152-target-price" target="_blank">DUOL 45% YTD Decline Analysis · TIKR</a>
+  <a href="https://www.benzinga.com/analyst-stock-ratings/price-target/26/05/52291490/duolingo-posts-q1-beat-faces-softness-in-monthly-active-user-growth" target="_blank">DUOL Q1 Beat, MAU Softness · Benzinga</a>
+  <a href="https://stockanalysis.com/stocks/duol/statistics/" target="_blank">DUOL Statistics & Valuation · StockAnalysis</a>
+  <a href="https://stockanalysis.com/stocks/spot/statistics/" target="_blank">SPOT Comp Data · StockAnalysis</a>
+  <a href="https://stockanalysis.com/stocks/rblx/statistics/" target="_blank">RBLX Comp Data · StockAnalysis</a>
+
+  <p class="disclaimer">本分析仅为研究备忘，非投资建议。所有估值假设和情景概率反映分析师主观判断，实际投资决策应结合个人风险偏好和组合上下文。数据截至 2026-05-06，可能因后续披露而变化。</p>
+</footer>
+
+</div>
+
+<!-- ================ CHARTS ================ -->
+<script>
+const baseFont = {family:"-apple-system,BlinkMacSystemFont,sans-serif",size:11};
+const gridColor = "rgba(140,160,200,0.08)";
+const axisColor = "#8aa0c2";
+Chart.defaults.color = axisColor;
+Chart.defaults.font = baseFont;
+
+// Chart 1: Growth components
+new Chart(document.getElementById('growthChart'),{
+  type:'bar',
+  data:{
+    labels:['DAU','付费用户','收入','Adj EBITDA','Bookings (Q1)','Bookings (Q2 guide)','Bookings (FY26 guide)'],
+    datasets:[{
+      label:'YoY 增速 (%)',
+      data:[21,21,27,18,14,6,10.5],
+      backgroundColor:(c)=>{
+        const v = c.parsed.y;
+        if(v>=20) return '#2ecc71';
+        if(v>=14) return '#f0b950';
+        return '#e74c3c';
+      },
+      borderRadius:4
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y.toFixed(1)+'%'}}},
+    scales:{
+      y:{grid:{color:gridColor},ticks:{callback:v=>v+'%'}},
+      x:{grid:{display:false}}
+    }
+  }
+});
+
+// Chart 2: Revenue and EBITDA trajectory
+new Chart(document.getElementById('trajChart'),{
+  type:'bar',
+  data:{
+    labels:['FY24A','FY25A','FY26E'],
+    datasets:[
+      {label:'Revenue ($M)',data:[531,1038,1205],backgroundColor:'#58a6ff',borderRadius:4,yAxisID:'y'},
+      {label:'Adj EBITDA ($M)',data:[140,278,310],backgroundColor:'#f0b950',borderRadius:4,yAxisID:'y'},
+      {label:'EBITDA Margin %',data:[26.4,26.8,25.7],type:'line',borderColor:'#2ecc71',backgroundColor:'#2ecc71',yAxisID:'y1',tension:0.3,pointRadius:5}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{position:'bottom',labels:{padding:14}}},
+    scales:{
+      y:{position:'left',grid:{color:gridColor},title:{display:true,text:'$M'}},
+      y1:{position:'right',grid:{display:false},title:{display:true,text:'Margin %'},ticks:{callback:v=>v+'%'}},
+      x:{grid:{display:false}}
+    }
+  }
+});
+
+// Chart 3: Comps scatter (EV/Sales vs Revenue Growth)
+new Chart(document.getElementById('compsChart'),{
+  type:'scatter',
+  data:{
+    datasets:[
+      {label:'DUOL',data:[{x:27,y:3.4,r:14}],backgroundColor:'#58a6ff'},
+      {label:'NFLX',data:[{x:12,y:8.5,r:14}],backgroundColor:'#e74c3c'},
+      {label:'SPOT',data:[{x:15,y:5.3,r:12}],backgroundColor:'#1db954'},
+      {label:'RBLX',data:[{x:22,y:8.0,r:12}],backgroundColor:'#f0b950'},
+      {label:'MTCH',data:[{x:2,y:2.4,r:10}],backgroundColor:'#a991e8'},
+      {label:'COUR',data:[{x:5,y:1.5,r:8}],backgroundColor:'#8aa0c2'},
+      {label:'CHGG',data:[{x:-37,y:0.4,r:8}],backgroundColor:'#666'}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'bottom',labels:{padding:12,boxWidth:10}},
+      tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.x}% growth, ${c.parsed.y}x EV/Sales`}}
+    },
+    scales:{
+      y:{title:{display:true,text:'EV / NTM Revenue (x)'},grid:{color:gridColor},min:0,max:10},
+      x:{title:{display:true,text:'NTM Revenue Growth (%)'},grid:{color:gridColor},min:-40,max:35}
+    }
+  }
+});
+
+// Chart: Analyst Target Prices Distribution
+new Chart(document.getElementById('duolAnalystChart'),{
+  type:'bar',
+  data:{
+    labels:['UBS','Goldman Sachs','Wells Fargo','BofA','DA Davidson','Citi','Evercore ISI','JP Morgan'],
+    datasets:[{
+      label:'目标价 ($)',
+      data:[450,250,160,103,90,85,97,92],
+      backgroundColor:(c)=>{
+        const v = c.parsed?.x ?? c.raw;
+        if(v >= 200) return '#f0b950';
+        if(v >= 130) return '#58a6ff';
+        return '#e74c3c';
+      },
+      borderRadius:4
+    }]
+  },
+  options:{
+    indexAxis:'y',
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:c=>'$'+c.parsed.x}}
+    },
+    scales:{
+      x:{
+        beginAtZero:false,
+        min:60, max:480,
+        grid:{color:gridColor},
+        ticks:{callback:v=>'$'+v}
+      },
+      y:{grid:{display:false}}
+    }
+  }
+});
+
+// Add current price reference line
+setTimeout(() => {
+  const ac = Chart.getChart('duolAnalystChart');
+  if (ac) {
+    const origDraw = ac.draw.bind(ac);
+    ac.draw = function() {
+      origDraw();
+      const ctx = ac.ctx;
+      const xScale = ac.scales.x;
+      const x = xScale.getPixelForValue(104);
+      const top = ac.chartArea.top;
+      const bottom = ac.chartArea.bottom;
+      ctx.save();
+      ctx.strokeStyle = '#e74c3c';
+      ctx.setLineDash([5,5]);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x, top);
+      ctx.lineTo(x, bottom);
+      ctx.stroke();
+      ctx.fillStyle = '#e74c3c';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.fillText('现价 $104', x + 5, top + 12);
+      ctx.restore();
+    };
+    ac.update();
+  }
+}, 100);
+
+// Chart 4: Scenario probability-weighted
+new Chart(document.getElementById('scenarioChart'),{
+  type:'bar',
+  data:{
+    labels:['Bear (30%)','Base (50%)','Bull (20%)','Probability-weighted','Current $104'],
+    datasets:[{
+      label:'每股价值 ($)',
+      data:[72,120,175,(72*0.3+120*0.5+175*0.2),104],
+      backgroundColor:['#e74c3c','#58a6ff','#2ecc71','#f0b950','#5a6478'],
+      borderRadius:4
+    }]
+  },
+  options:{
+    indexAxis:'y',responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.parsed.x.toFixed(0)}}},
+    scales:{
+      x:{grid:{color:gridColor},ticks:{callback:v=>'$'+v}},
+      y:{grid:{display:false}}
+    }
+  }
+});
+</script>
+</body>
+</html>

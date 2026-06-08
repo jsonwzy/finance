@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 美股全景筛选 · 2026 Q2 · 候选池非建议</title>
+<style>
+  :root{
+    --bg:#0a0f1c; --panel:#0f1729; --panel2:#141d35; --line:#1d2a47;
+    --ink:#e8eef9; --mute:#86a0c5; --accent:#7db8ff; --gold:#f0b950;
+    --green:#2ecc71; --red:#e74c3c; --amber:#f39c12; --purple:#a991e8;
+    --b1:#ff6b6b; --b2:#ff9f43; --b3:#feca57; --b4:#48dbfb; --b5:#a991e8; --b6:#ff5e8a; --b7:#1abc9c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .container{max-width:1400px;margin:0 auto;padding:32px 24px}
+
+  header.hero{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:30px;position:relative}
+  header.hero::after{content:"";position:absolute;bottom:-1px;left:0;width:120px;height:3px;background:linear-gradient(90deg,var(--b1),var(--b6))}
+  .eyebrow{color:var(--accent);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+  h1{font-size:32px;font-weight:700;margin-top:6px;letter-spacing:-.01em;line-height:1.2}
+  h1 .grad{background:linear-gradient(90deg,var(--b1),var(--b3),var(--b5));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800}
+  .subtitle{color:var(--mute);font-size:14.5px;margin-top:8px;max-width:920px}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .pill{background:var(--panel);border:1px solid var(--line);padding:6px 12px;border-radius:999px;font-size:12.5px;color:var(--mute)}
+  .pill strong{color:var(--ink);margin-left:5px}
+
+  section{margin-bottom:34px}
+  h2{font-size:20px;font-weight:700;margin-bottom:6px;display:flex;align-items:baseline;gap:10px}
+  h2 .badge{font-family:"SF Mono",monospace;font-size:11px;padding:3px 8px;border-radius:6px;letter-spacing:.05em;font-weight:600}
+  .b1 .badge{background:rgba(255,107,107,.15);color:var(--b1)}
+  .b2 .badge{background:rgba(255,159,67,.15);color:var(--b2)}
+  .b3 .badge{background:rgba(254,202,87,.15);color:var(--b3)}
+  .b4 .badge{background:rgba(72,219,251,.15);color:var(--b4)}
+  .b5 .badge{background:rgba(169,145,232,.15);color:var(--b5)}
+  .b6 .badge{background:rgba(255,94,138,.15);color:var(--b6)}
+  .b7 .badge{background:rgba(26,188,156,.15);color:var(--b7)}
+  .sec-blurb{color:var(--mute);font-size:13px;margin-bottom:12px}
+
+  /* Intro alerts */
+  .alert{border-radius:10px;padding:14px 18px;margin:14px 0;font-size:13.5px;color:#cdd7e8;border:1px solid var(--line);background:var(--panel)}
+  .alert.warn{background:linear-gradient(135deg,#2a1d0a,var(--panel));border-color:#5a3a14}
+  .alert.warn strong{color:var(--gold)}
+  .alert.note{background:linear-gradient(135deg,#0d1a26,var(--panel));border-color:#1d3a52}
+  .alert.note strong{color:var(--accent)}
+  .alert.danger{background:linear-gradient(135deg,#2a0d11,var(--panel));border-color:#5a1d24}
+  .alert.danger strong{color:var(--red)}
+  .alert h3{font-size:14px;margin-bottom:6px;color:var(--ink);font-weight:700}
+
+  /* Legend */
+  .legend{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 20px}
+  @media (max-width:920px){.legend{grid-template-columns:repeat(2,1fr)}}
+  .leg-card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:12.5px}
+  .leg-card .ltitle{color:var(--accent);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;font-weight:600}
+  .leg-card .lrow{display:flex;justify-content:space-between;color:#cdd7e8;margin:3px 0}
+  .leg-card .lrow span:first-child{font-family:"SF Mono",monospace;color:var(--gold)}
+  .leg-card .lrow .lmute{color:var(--mute);font-size:11.5px}
+
+  /* Table */
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:12.5px;table-layout:fixed}
+  thead{background:var(--panel2)}
+  th{padding:9px 8px;text-align:left;color:var(--mute);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line);vertical-align:bottom}
+  td{padding:9px 8px;border-bottom:1px solid var(--line);color:#cdd7e8;font-size:12.5px;vertical-align:top;word-wrap:break-word}
+  tr:last-child td{border-bottom:none}
+  tr:hover{background:rgba(125,184,255,.04)}
+
+  /* Column widths */
+  col.c-tic{width:9%}
+  col.c-mc{width:7%}
+  col.c-biz{width:18%}
+  col.c-exp{width:6%}
+  col.c-moat{width:17%}
+  col.c-var{width:23%}
+  col.c-pri{width:8%}
+  col.c-note{width:12%}
+
+  .tic{font-family:"SF Mono",monospace;font-weight:700;color:var(--gold);font-size:13px;display:block}
+  .tic .name{display:block;font-family:-apple-system,sans-serif;font-weight:500;color:var(--mute);font-size:11px;margin-top:2px}
+  .mc{font-family:"SF Mono",monospace;color:var(--ink);font-size:12px}
+  .mc.borderline{color:var(--amber)}
+
+  .exp{display:inline-block;padding:2px 6px;border-radius:5px;font-family:"SF Mono",monospace;font-size:11px;font-weight:700;letter-spacing:.02em}
+  .exp.e1{background:rgba(46,204,113,.18);color:var(--green);border:1px solid rgba(46,204,113,.35)}
+  .exp.e2{background:rgba(243,156,18,.15);color:var(--amber);border:1px solid rgba(243,156,18,.30)}
+  .exp.e3{background:rgba(134,160,197,.12);color:var(--mute);border:1px solid rgba(134,160,197,.25)}
+
+  .pri{display:inline-block;padding:3px 8px;border-radius:5px;font-family:"SF Mono",monospace;font-size:11px;font-weight:700;letter-spacing:.04em}
+  .pri.high{background:rgba(46,204,113,.22);color:var(--green);border:1px solid rgba(46,204,113,.4)}
+  .pri.mid{background:rgba(243,156,18,.15);color:var(--amber);border:1px solid rgba(243,156,18,.3)}
+  .pri.low{background:rgba(134,160,197,.10);color:var(--mute);border:1px solid rgba(134,160,197,.20)}
+  .pri.skip{background:rgba(231,76,60,.12);color:var(--red);border:1px solid rgba(231,76,60,.28)}
+
+  .moat-strong{color:var(--green)}
+  .moat-mid{color:var(--amber)}
+  .moat-weak{color:var(--red)}
+
+  .check{color:var(--accent);font-weight:700}
+  .small{font-size:11px;color:var(--mute)}
+
+  /* Section banner color strip */
+  .sec-bar{height:3px;width:60px;margin-bottom:8px;border-radius:2px}
+  .b1 .sec-bar{background:var(--b1)} .b2 .sec-bar{background:var(--b2)}
+  .b3 .sec-bar{background:var(--b3)} .b4 .sec-bar{background:var(--b4)}
+  .b5 .sec-bar{background:var(--b5)} .b6 .sec-bar{background:var(--b6)}
+  .b7 .sec-bar{background:var(--b7)}
+
+  /* TOC */
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;margin-bottom:24px;font-size:12.5px}
+  .toc strong{color:var(--accent);letter-spacing:.05em;margin-right:8px}
+  .toc a{color:#cdd7e8;text-decoration:none;margin-right:14px;display:inline-block;padding:2px 0}
+  .toc a:hover{color:var(--gold)}
+
+  /* Summary at bottom */
+  .summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+  @media (max-width:920px){.summary-grid{grid-template-columns:repeat(2,1fr)}}
+  .sum-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+  .sum-card .lbl{color:var(--mute);font-size:11px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+  .sum-card .val{font-size:20px;font-weight:700;color:var(--ink);font-family:"SF Mono",monospace}
+  .sum-card .desc{color:var(--mute);font-size:12px;margin-top:4px}
+
+  footer{border-top:1px solid var(--line);padding-top:22px;margin-top:40px;color:var(--mute);font-size:12px;line-height:1.7}
+  .disclaimer{margin-top:14px;font-size:11px;color:#5d738f;font-style:italic;line-height:1.6}
+
+  ul{padding-left:20px;margin:6px 0}
+  ul li{color:#cdd7e8;margin:3px 0;font-size:13px}
+
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="hero">
+  <div class="eyebrow">Thematic Screen · AI Universe</div>
+  <h1>AI 美股全景<span class="grad">候选池筛选</span><br><span style="font-size:24px;color:var(--mute);font-weight:500">不是 thesis 也不是建议，只是把能放进圈外/可补习的候选列出来</span></h1>
+  <p class="subtitle">筛选标准：美股上市、市值 ≥ $10B、与 AI 价值链直接或间接相关。剔除中概。共覆盖 <strong>90 家</strong>，按 14 个赛道分组。</p>
+  <div class="meta">
+    <span class="pill">研究日期 <strong>2026-05-25</strong></span>
+    <span class="pill">市值数据 <strong>2026-05-25 · yfinance</strong></span>
+    <span class="pill">阈值 <strong>MC ≥ $10B</strong></span>
+    <span class="pill">深度 <strong>screening 非 thesis</strong></span>
+  </div>
+</header>
+
+<!-- ========= INTRO ALERTS ========= -->
+<div class="alert warn">
+  <h3>⚠ 这份清单的"正确用法"</h3>
+  <p>按你 CLAUDE.md 框架，<strong>原则1 是闸门</strong>："懂的本质 = 能对这门生意做出独立、可证伪的预判"。这份清单<strong>不替你过原则1</strong>——它只把候选公司放在面前让你决定<em>是否值得花时间补习</em>。</p>
+  <ul>
+    <li>"补习优先级" = 我对"研究 ROI"的判断，可反驳</li>
+    <li>所有"壁垒/业务变量"是<strong>提供锚点</strong>不是结论。你要按你自己的 5 句话+下限+50% 加仓三个 test 独立过</li>
+    <li>不要把这份清单当成 "AI 板块多元化建仓清单"——原则3 限制总持仓 7 个，进攻型大仓 ≤ 3 个</li>
+  </ul>
+</div>
+
+<div class="alert note">
+  <h3>ℹ 数据 / 方法</h3>
+  <ul>
+    <li><strong>市值数据 = 2026-05-25 实时 (yfinance)</strong>。已按 ≥$10B 严格过滤。接近阈值的 (TTD/PINS/CFLT) 标 <span style="color:var(--amber)">amber</span></li>
+    <li><strong>"AI 暴露度" 三档</strong>：1° = 收入直接绑 AI capex/部署；2° = 主业受益但非纯 AI（电力/DC REIT/SaaS 加 AI 层）；3° = AI 是叙事、主业未变</li>
+    <li><strong>"补习优先级" 四档</strong>：高 = 业务模式独特+独立研究有 alpha；中 = 受益明显但易复述；低 = 主业不依赖深度补习；跳过 = 买 ETF (SMH/QQQ/AIQ) 接住即可</li>
+    <li><strong>已研究 ✓</strong> = 你 finance/ 目录下已有独立 HTML 分析的标的（沿用即可，新工作主要看其他）</li>
+  </ul>
+</div>
+
+<div class="alert danger">
+  <h3>🔥 市值更新提示：训练数据 (2026-01) vs 今天 (2026-05) 几大异动</h3>
+  <p style="margin-bottom:8px"><strong style="color:var(--red)">疯涨方</strong>（半导体+AI 电力 是 2026 上半年主线）：</p>
+  <ul style="margin-bottom:10px">
+    <li><strong style="color:var(--gold)">MU</strong>: ~$130B → <strong>$847B</strong> (6.5x) — HBM 周期完全爆发</li>
+    <li><strong style="color:var(--gold)">INTC</strong>: ~$90B → <strong>$602B</strong> (6.7x) — 代工/产品双拐点已被 price in，必须重新评估壁垒</li>
+    <li><strong style="color:var(--gold)">BE</strong>: ~$15B → <strong>$86B</strong> (5.7x) — AI 电荒推燃料电池</li>
+    <li><strong style="color:var(--gold)">AMD</strong>: ~$250B → <strong>$762B</strong> (3x) · <strong style="color:var(--gold)">ARM</strong>: ~$130B → <strong>$326B</strong> · <strong style="color:var(--gold)">AVGO</strong>: ~$1T → <strong>$1.96T</strong> · <strong style="color:var(--gold)">TSM/ASML</strong>: 2x</li>
+    <li><strong style="color:var(--gold)">GOOGL</strong>: ~$2.5T → <strong>$4.64T</strong> (反超 AAPL，搜索 AI 替代担忧反转)</li>
+    <li><strong style="color:var(--gold)">光互连/CPO 整组爆发</strong>：LITE ~$6B → <strong>$74B</strong> (12x) · CIEN ~$15B → <strong>$83B</strong> (5x) · COHR ~$15B → <strong>$74B</strong> (5x) — 800G/1.6T 转换 + CPO 量产预期</li>
+  </ul>
+  <p style="margin-bottom:8px"><strong style="color:var(--accent)">软在 mega-cap</strong>：</p>
+  <ul style="margin-bottom:10px">
+    <li><strong style="color:var(--accent)">MSFT</strong>: ~$3.5T → <strong>$3.11T</strong> (-11%) · <strong style="color:var(--accent)">META</strong>: ~$1.8T → <strong>$1.55T</strong> (-14%) — 应用层 ROI 仍未充分证明</li>
+  </ul>
+  <p style="margin-bottom:8px"><strong style="color:var(--red)">被剔除 (跌破 $10B)</strong>：</p>
+  <ul>
+    <li><strong>ESTC</strong> ($5.7B) · <strong>DUOL</strong> ($5.0B，AI tutor 拐点没兑现+消费教育需求疲弱) · <strong>MBLY</strong> ($8.6B) · <strong>TEM</strong> ($8.3B)</li>
+  </ul>
+  <p style="font-size:12px;color:var(--mute);margin-top:8px"><strong style="color:var(--gold)">⚠ 框架提醒：</strong>看到这些异动很容易触发"performance envy + AI 时代要学习"双重溶解。<em>大涨不等于过原则1，更不等于现在该买</em>——已涨 5-7x 的标的，胜率赔率已经完全不同，下限被抬高反而风险更不对称。</p>
+</div>
+
+<!-- ========= TOC ========= -->
+<div class="toc">
+  <strong>目录</strong>
+  <a href="#sec1">①算力芯片</a>
+  <a href="#sec2">②半导体设备/Foundry/Memory</a>
+  <a href="#sec3">③模拟/电源/连接</a>
+  <a href="#sec4">④AI 服务器/网络/光互连</a>
+  <a href="#sec5">⑤Hyperscaler/大平台</a>
+  <a href="#sec6">⑥AI 应用 SaaS</a>
+  <a href="#sec7">⑦数据/可观测</a>
+  <a href="#sec8">⑧网络安全</a>
+  <a href="#sec9">⑨DC 基建(电力/冷却)</a>
+  <a href="#sec10">⑩核电/IPP</a>
+  <a href="#sec11">⑪DC REIT/Neocloud</a>
+  <a href="#sec12">⑫广告/推荐 AI</a>
+  <a href="#sec13">⑬自动驾驶/机器人/工业</a>
+  <a href="#sec14">⑭消费/游戏 AI</a>
+  <a href="#summary">汇总+下一步</a>
+</div>
+
+<!-- ========= LEGEND ========= -->
+<div class="legend">
+  <div class="leg-card">
+    <div class="ltitle">AI 暴露度</div>
+    <div class="lrow"><span class="exp e1">1°</span><span class="lmute">收入直接绑 AI capex/部署</span></div>
+    <div class="lrow"><span class="exp e2">2°</span><span class="lmute">主业受益，AI 是放大器</span></div>
+    <div class="lrow"><span class="exp e3">3°</span><span class="lmute">AI 是叙事，主业未变</span></div>
+  </div>
+  <div class="leg-card">
+    <div class="ltitle">补习优先级</div>
+    <div class="lrow"><span class="pri high">高</span><span class="lmute">独特+独立研究有 alpha</span></div>
+    <div class="lrow"><span class="pri mid">中</span><span class="lmute">受益明显但易复述</span></div>
+    <div class="lrow"><span class="pri low">低</span><span class="lmute">主业不变，narrative 暴露</span></div>
+    <div class="lrow"><span class="pri skip">ETF</span><span class="lmute">用 SMH/QQQ/AIQ 接住</span></div>
+  </div>
+  <div class="leg-card">
+    <div class="ltitle">壁垒强度</div>
+    <div class="lrow"><span class="moat-strong">强</span><span class="lmute">未来 2-3 年难被复制</span></div>
+    <div class="lrow"><span class="moat-mid">中</span><span class="lmute">存在但有侵蚀风险</span></div>
+    <div class="lrow"><span class="moat-weak">弱</span><span class="lmute">沙上城堡 / 周期</span></div>
+  </div>
+  <div class="leg-card">
+    <div class="ltitle">市值标记</div>
+    <div class="lrow"><span style="color:var(--ink);font-family:'SF Mono',monospace">~$XB</span><span class="lmute">约值，自行核查</span></div>
+    <div class="lrow"><span style="color:var(--amber);font-family:'SF Mono',monospace">~$XB</span><span class="lmute">$10B 附近，边界</span></div>
+    <div class="lrow"><span class="check">✓</span><span class="lmute">已有独立深度分析</span></div>
+  </div>
+</div>
+
+<!-- ============================ ①算力芯片 ============================ -->
+<section id="sec1" class="b1">
+  <div class="sec-bar"></div>
+  <h2><span class="badge">L1 · COMPUTE</span>① 算力芯片 — GPU / ASIC / 加速器</h2>
+  <p class="sec-blurb">AI 模型训练/推理的"挖矿设备层"。资本最先流入、估值波动最大。</p>
+  <table>
+    <colgroup><col class="c-tic"><col class="c-mc"><col class="c-biz"><col class="c-exp"><col class="c-moat"><col class="c-var"><col class="c-pri"><col class="c-note"></colgroup>
+    <thead><tr><th>Ticker / 公司</th><th>市值 ~</th><th>一句话生意</th><th>AI 暴露</th><th>壁垒</th><th>关键业务变量</th><th>优先级</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tic">NVDA<span class="name">NVIDIA</span></span></td><td class="mc">$5.22T</td><td>GPU + CUDA 软件栈</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">CUDA 生态 / 强</span></td><td>DC GPU 出货、gross margin、CUDA 替代品市占</td><td><span class="pri high">高</span></td><td class="small">行业核心</td></tr>
+      <tr><td><span class="tic">AMD<span class="name">AMD</span></span></td><td class="mc">$762B</td><td>GPU (MI 系列) + x86 CPU</td><td><span class="exp e1">1°</span></td><td><span class="moat-mid">追赶者 / 中</span></td><td>MI 系列 ramp、hyperscaler 单签订量、ROCm 软件进展</td><td><span class="pri high">高</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">AVGO<span class="name">Broadcom</span></span></td><td class="mc">$1.96T</td><td>定制 ASIC (Google TPU、Meta) + 网络</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">客户绑定+工艺 / 强</span></td><td>新客户 ASIC 项目中标、VMware 整合后毛利</td><td><span class="pri high">高</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">MRVL<span class="name">Marvell</span></span></td><td class="mc">$172B</td><td>定制 silicon (AWS Trainium、Google)</td><td><span class="exp e1">1°</span></td><td><span class="moat-mid">大客户绑定 / 中强</span></td><td>单客户集中度、ASIC 项目 ramp、光互连占比</td><td><span class="pri mid">中</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">INTC<span class="name">Intel</span></span></td><td class="mc">$602B</td><td>x86 CPU + 代工 (失血)</td><td><span class="exp e1">1°</span></td><td><span class="moat-weak">工艺落后 / 弱</span></td><td>18A 良率、代工外部客户、政府补贴</td><td><span class="pri skip">ETF</span></td><td class="small">turnaround 风险高</td></tr>
+      <tr><td><span class="tic">ARM<span class="name">Arm Holdings</span></span></td><td class="mc">$326B</td><td>ISA 授权 (移动、车用、DC)</td><td><span class="exp e2">2°</span></td><td><span class="moat-strong">标准 lock-in / 强</span></td><td>DC 市占、单芯片授权费率、v9 渗透</td><td><span class="pri mid">中</span></td><td class="small">估值常态偏贵</td></tr>
+      <tr><td><span class="tic">QCOM<span class="name">Qualcomm</span></span></td><td class="mc">$251B</td><td>移动 SoC + edge AI + 调制解调器</td><td><span class="exp e2">2°-3°</span></td><td><span class="moat-strong">移动调制解调器 / 强</span></td><td>自动驾驶/工业新收入、Apple 替换风险</td><td><span class="pri mid">中</span></td><td class="small">业务多元化中</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ ②半导体设备 ============================ -->
+<section id="sec2" class="b2">
+  <div class="sec-bar"></div>
+  <h2><span class="badge">L1.5 · SUPPLY</span>② 半导体设备 / Foundry / Memory</h2>
+  <p class="sec-blurb">上游"卖铲子"。周期性强但有结构性容量稀缺。</p>
+  <table>
+    <colgroup><col class="c-tic"><col class="c-mc"><col class="c-biz"><col class="c-exp"><col class="c-moat"><col class="c-var"><col class="c-pri"><col class="c-note"></colgroup>
+    <thead><tr><th>Ticker / 公司</th><th>市值 ~</th><th>一句话生意</th><th>AI 暴露</th><th>壁垒</th><th>关键业务变量</th><th>优先级</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tic">TSM<span class="name">TSMC</span></span></td><td class="mc">$2.10T</td><td>先进制程独家代工</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">工艺+规模 / 极强</span></td><td>3nm/2nm ramp、客户分配、地缘政治</td><td><span class="pri high">高</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">ASML<span class="name">ASML</span></span></td><td class="mc">$629B</td><td>EUV 光刻机唯一供应</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">物理垄断 / 极强</span></td><td>高 NA EUV 订单、中国销售限制、TSMC capex</td><td><span class="pri high">高</span></td><td class="small">独占性最强标的之一</td></tr>
+      <tr><td><span class="tic">AMAT<span class="name">Applied Materials</span></span></td><td class="mc">$343B</td><td>WFE 综合设备</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">设备组合广 / 强</span></td><td>WFE capex 周期、HBM 设备订单</td><td><span class="pri mid">中</span></td><td class="small">周期股属性</td></tr>
+      <tr><td><span class="tic">LRCX<span class="name">Lam Research</span></span></td><td class="mc">$382B</td><td>etch / depo 设备</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">工艺 know-how / 强</span></td><td>3D NAND/DRAM capex、HBM 蚀刻</td><td><span class="pri mid">中</span></td><td class="small">同 AMAT</td></tr>
+      <tr><td><span class="tic">KLAC<span class="name">KLA</span></span></td><td class="mc">$247B</td><td>量测检测设备</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">检测必需品 / 强</span></td><td>良率检测需求、先进制程渗透</td><td><span class="pri mid">中</span></td><td class="small">设备里最稳</td></tr>
+      <tr><td><span class="tic">TER<span class="name">Teradyne</span></span></td><td class="mc">$56B</td><td>半导体+机器人测试</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">客户绑定 / 中</span></td><td>半导体测试需求、机器人业务</td><td><span class="pri low">低</span></td><td class="small">机器人题材边缘</td></tr>
+      <tr><td><span class="tic">MU<span class="name">Micron</span></span></td><td class="mc">$847B</td><td>HBM / DRAM / NAND</td><td><span class="exp e1">1°</span></td><td><span class="moat-mid">HBM 配额 / 中强</span></td><td>HBM3E/4 出货占比、ASP 周期、Hynix/三星竞争</td><td><span class="pri high">高</span></td><td class="small">周期+成长双驱</td></tr>
+      <tr><td><span class="tic">WDC<span class="name">Western Digital</span></span></td><td class="mc">$167B</td><td>HDD (分拆后)</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">寡头 / 中</span></td><td>DC HDD 需求、容量 ASP</td><td><span class="pri low">低</span></td><td class="small">2025 已分拆 SNDK</td></tr>
+      <tr><td><span class="tic">STX<span class="name">Seagate</span></span></td><td class="mc">$182B</td><td>HDD (大容量 HAMR)</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">寡头+HAMR / 中</span></td><td>HAMR ramp、DC 大容量 mix</td><td><span class="pri low">低</span></td><td class="small">HDD 还能涨周期</td></tr>
+      <tr><td><span class="tic">ENTG<span class="name">Entegris</span></span></td><td class="mc">$21B</td><td>半导体材料/纯净化学品</td><td><span class="exp e2">2°</span></td><td><span class="moat-strong">材料认证 / 强</span></td><td>WFE capex、CMP 耗材占比</td><td><span class="pri low">低</span></td><td class="small">小众但稳</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ ③模拟/电源 ============================ -->
+<section id="sec3" class="b3">
+  <div class="sec-bar"></div>
+  <h2><span class="badge">L1.7 · ANALOG</span>③ 模拟 / 电源 / 连接</h2>
+  <p class="sec-blurb">大部分是工业+车用周期股，AI 是边缘叙事。MPWR 是这组里唯一 AI 直接相关。</p>
+  <table>
+    <colgroup><col class="c-tic"><col class="c-mc"><col class="c-biz"><col class="c-exp"><col class="c-moat"><col class="c-var"><col class="c-pri"><col class="c-note"></colgroup>
+    <thead><tr><th>Ticker / 公司</th><th>市值 ~</th><th>一句话生意</th><th>AI 暴露</th><th>壁垒</th><th>关键业务变量</th><th>优先级</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tic">TXN<span class="name">Texas Instruments</span></span></td><td class="mc">$281B</td><td>模拟之王 (工业+车)</td><td><span class="exp e3">3°</span></td><td><span class="moat-strong">工艺广度 / 强</span></td><td>工业+车用周期、产能 capex</td><td><span class="pri skip">ETF</span></td><td class="small">非 AI 题材</td></tr>
+      <tr><td><span class="tic">ADI<span class="name">Analog Devices</span></span></td><td class="mc">$193B</td><td>模拟高端信号链</td><td><span class="exp e3">3°</span></td><td><span class="moat-strong">信号链 / 强</span></td><td>工业+车用周期</td><td><span class="pri skip">ETF</span></td><td class="small">同 TXN</td></tr>
+      <tr><td><span class="tic">ON<span class="name">ON Semiconductor</span></span></td><td class="mc">$45B</td><td>模拟+ SiC 功率器件</td><td><span class="exp e3">3°</span></td><td><span class="moat-mid">SiC 工艺 / 中</span></td><td>SiC 业务、车用周期</td><td><span class="pri skip">ETF</span></td><td class="small">EV 周期股</td></tr>
+      <tr><td><span class="tic">NXPI<span class="name">NXP</span></span></td><td class="mc">$80B</td><td>汽车模拟+MCU</td><td><span class="exp e3">3°</span></td><td><span class="moat-mid">车用绑定 / 中</span></td><td>车用周期</td><td><span class="pri skip">ETF</span></td><td class="small">车用周期</td></tr>
+      <tr><td><span class="tic">MCHP<span class="name">Microchip</span></span></td><td class="mc">$51B</td><td>MCU + 模拟</td><td><span class="exp e3">3°</span></td><td><span class="moat-mid">客户分散 / 中</span></td><td>工业库存周期</td><td><span class="pri skip">ETF</span></td><td class="small">工业周期</td></tr>
+      <tr><td><span class="tic">MPWR<span class="name">Monolithic Power</span></span></td><td class="mc">$78B</td><td>AI 服务器电源 IC</td><td><span class="exp e1">1°</span></td><td><span class="moat-mid">工艺集成 / 中强</span></td><td>AI server power 份额、NVDA 关系、毛利</td><td><span class="pri mid">中</span></td><td class="small">AI 真受益的模拟股</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ ④AI 服务器/硬件 ============================ -->
+<section id="sec4" class="b4">
+  <div class="sec-bar"></div>
+  <h2><span class="badge">L2 · IRON</span>④ AI 服务器 / 网络 / 光互连</h2>
+  <p class="sec-blurb">把芯片组装成可卖的盒子+机柜+互连。AI 网络带宽是 2026 上半年最强主线之一，CPO（共封装光器件）/transceivers 出货量预期上调，COHR/LITE/CIEN 都翻倍。</p>
+  <table>
+    <colgroup><col class="c-tic"><col class="c-mc"><col class="c-biz"><col class="c-exp"><col class="c-moat"><col class="c-var"><col class="c-pri"><col class="c-note"></colgroup>
+    <thead><tr><th>Ticker / 公司</th><th>市值 ~</th><th>一句话生意</th><th>AI 暴露</th><th>壁垒</th><th>关键业务变量</th><th>优先级</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tic">SMCI<span class="name">Super Micro</span></span></td><td class="mc">$21B</td><td>AI 服务器 OEM (NVDA 紧密)</td><td><span class="exp e1">1°</span></td><td><span class="moat-weak">速度+NVDA 关系 / 弱</span></td><td>季度收入兑现、审计/合规风险、毛利</td><td><span class="pri mid">中</span></td><td class="small">高波动、审计有阴影</td></tr>
+      <tr><td><span class="tic">DELL<span class="name">Dell</span></span></td><td class="mc">$192B</td><td>企业服务器+AI rack</td><td><span class="exp e1">1°-2°</span></td><td><span class="moat-mid">渠道 / 中</span></td><td>AI 订单 backlog、毛利率压制</td><td><span class="pri mid">中</span></td><td class="small">企业 AI 拐点指标</td></tr>
+      <tr><td><span class="tic">HPE<span class="name">HPE</span></span></td><td class="mc">$50B</td><td>服务器 + Juniper (网络)</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">企业渠道 / 中</span></td><td>Juniper 整合、AI 订单 mix</td><td><span class="pri low">低</span></td><td class="small">Juniper 整合中</td></tr>
+      <tr><td><span class="tic">IBM<span class="name">IBM</span></span></td><td class="mc">$239B</td><td>mainframe + 咨询 + watsonx</td><td><span class="exp e3">3°</span></td><td><span class="moat-mid">大客户 lock-in / 中</span></td><td>咨询业务、watsonx ARR、Red Hat</td><td><span class="pri skip">ETF</span></td><td class="small">转型类</td></tr>
+      <tr><td><span class="tic">ANET<span class="name">Arista Networks</span></span></td><td class="mc">$194B</td><td>数据中心交换机+EOS</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">EOS 软件 / 强</span></td><td>Meta/MSFT 大客户占比、白盒竞争、毛利</td><td><span class="pri high">高</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">CRDO<span class="name">Credo</span></span></td><td class="mc">$40B</td><td>DC 高速互连 (AEC)</td><td><span class="exp e1">1°</span></td><td><span class="moat-mid">工艺+客户认证 / 中</span></td><td>大客户订单 ramp、112G→224G 转换</td><td><span class="pri mid">中</span></td><td class="small">高波动小盘</td></tr>
+      <tr><td><span class="tic">ALAB<span class="name">Astera Labs</span></span></td><td class="mc">$53B</td><td>PCIe / CXL retimer</td><td><span class="exp e1">1°</span></td><td><span class="moat-mid">协议+客户认证 / 中</span></td><td>PCIe 6.0/7.0 ramp、客户分散度</td><td><span class="pri mid">中</span></td><td class="small">市值波动大</td></tr>
+      <tr><td><span class="tic">COHR<span class="name">Coherent</span></span></td><td class="mc">$74B</td><td>光收发器 + CPO + 激光</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">光器件工艺 / 强</span></td><td>800G/1.6T 光模块出货、CPO 量产时间表、NVDA/Meta 订单</td><td><span class="pri high">高</span></td><td class="small">CPO 龙头</td></tr>
+      <tr><td><span class="tic">LITE<span class="name">Lumentum</span></span></td><td class="mc">$74B</td><td>光器件 + 数通收发器</td><td><span class="exp e1">1°</span></td><td><span class="moat-mid">光元件 / 中强</span></td><td>数通收发器订单、Cloud Light 整合、毛利</td><td><span class="pri mid">中</span></td><td class="small">$6B→$74B 12x</td></tr>
+      <tr><td><span class="tic">CIEN<span class="name">Ciena</span></span></td><td class="mc">$83B</td><td>相干光通信 + DCI</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">WaveLogic 相干 / 强</span></td><td>DCI/AI 数据中心互联订单、WaveLogic 6 渗透</td><td><span class="pri mid">中</span></td><td class="small">相干光最纯玩家</td></tr>
+      <tr><td><span class="tic">FN<span class="name">Fabrinet</span></span></td><td class="mc">$25B</td><td>光器件代工 (NVDA/CIEN 客户)</td><td><span class="exp e1">1°</span></td><td><span class="moat-mid">代工绑定 / 中</span></td><td>客户集中度、单客户依赖、毛利</td><td><span class="pri mid">中</span></td><td class="small">"光的台积电"</td></tr>
+      <tr><td><span class="tic">AAOI<span class="name">Applied Optoelectronics</span></span></td><td class="mc">$15B</td><td>数通光模块 (小厂)</td><td><span class="exp e1">1°</span></td><td><span class="moat-weak">单客户依赖 / 弱</span></td><td>大客户订单（Microsoft/NVDA）、产能爬坡</td><td><span class="pri low">低</span></td><td class="small">高波动小盘</td></tr>
+      <tr><td><span class="tic">CSCO<span class="name">Cisco</span></span></td><td class="mc">$475B</td><td>企业网络 + Silicon One ASIC + Acacia 光</td><td><span class="exp e2">2°</span></td><td><span class="moat-strong">企业渠道 / 强</span></td><td>Silicon One 外部销售、Splunk 整合、AI 订单 backlog</td><td><span class="pri mid">中</span></td><td class="small">老 incumbent + AI 转型</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ ⑤Hyperscaler ============================ -->
+<section id="sec5" class="b5">
+  <div class="sec-bar"></div>
+  <h2><span class="badge">L3 · CLOUD</span>⑤ Hyperscaler / 大平台</h2>
+  <p class="sec-blurb">既是 AI capex 的"买方"也是 AI 货币化的"卖方"。这里几乎每一家都是 1° 暴露+极强壁垒。</p>
+  <table>
+    <colgroup><col class="c-tic"><col class="c-mc"><col class="c-biz"><col class="c-exp"><col class="c-moat"><col class="c-var"><col class="c-pri"><col class="c-note"></colgroup>
+    <thead><tr><th>Ticker / 公司</th><th>市值 ~</th><th>一句话生意</th><th>AI 暴露</th><th>壁垒</th><th>关键业务变量</th><th>优先级</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tic">MSFT<span class="name">Microsoft</span></span></td><td class="mc">$3.11T</td><td>Azure + OpenAI 独家 + Copilot</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">企业 lock-in+OpenAI / 极强</span></td><td>Azure AI 增长、Copilot ARR、capex 投入产出</td><td><span class="pri high">高</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">GOOGL<span class="name">Alphabet</span></span></td><td class="mc">$4.64T</td><td>搜索 + GCP + Gemini + TPU</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">数据+TPU+搜索 / 极强</span></td><td>搜索 AI 替代风险、GCP 增长、TPU 外部销售</td><td><span class="pri high">高</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">AMZN<span class="name">Amazon</span></span></td><td class="mc">$2.86T</td><td>电商 + AWS + Bedrock + Trainium</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">AWS 规模 / 极强</span></td><td>AWS AI workload 占比、Trainium adoption、电商利润</td><td><span class="pri high">高</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">META<span class="name">Meta</span></span></td><td class="mc">$1.55T</td><td>社交 + Llama + AI 广告</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">数据+用户 / 极强</span></td><td>AI 广告 ROAS、Llama 商业化、Reality Labs 烧钱</td><td><span class="pri high">高</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">AAPL<span class="name">Apple</span></span></td><td class="mc">$4.54T</td><td>iPhone + Apple Intelligence</td><td><span class="exp e3">3°</span></td><td><span class="moat-strong">生态 / 极强</span></td><td>iPhone AI 周期、Services 毛利、监管罚款</td><td><span class="pri mid">中</span></td><td class="small"><span class="check">✓</span> AI 是配菜</td></tr>
+      <tr><td><span class="tic">ORCL<span class="name">Oracle</span></span></td><td class="mc">$552B</td><td>数据库 + OCI + AI 大单</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">企业数据 lock-in / 强</span></td><td>OCI 增长、OpenAI/字节大单兑现、毛利</td><td><span class="pri mid">中</span></td><td class="small">最近被炒得很高</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ ⑥应用 SaaS ============================ -->
+<section id="sec6" class="b6">
+  <div class="sec-bar"></div>
+  <h2><span class="badge">L4 · SAAS</span>⑥ AI 应用 SaaS (incumbents 加 AI 层)</h2>
+  <p class="sec-blurb">老牌 SaaS 把 AI 当成防御工具+毛利放大器。市场分歧最大的一组——估值被"AI 替代"叙事压制。</p>
+  <table>
+    <colgroup><col class="c-tic"><col class="c-mc"><col class="c-biz"><col class="c-exp"><col class="c-moat"><col class="c-var"><col class="c-pri"><col class="c-note"></colgroup>
+    <thead><tr><th>Ticker / 公司</th><th>市值 ~</th><th>一句话生意</th><th>AI 暴露</th><th>壁垒</th><th>关键业务变量</th><th>优先级</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tic">CRM<span class="name">Salesforce</span></span></td><td class="mc">$147B</td><td>CRM + Agentforce</td><td><span class="exp e2">2°-3°</span></td><td><span class="moat-strong">CRM lock-in / 强</span></td><td>Agentforce ARR、净留存、margin</td><td><span class="pri mid">中</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">NOW<span class="name">ServiceNow</span></span></td><td class="mc">$105B</td><td>ITSM + Now Assist</td><td><span class="exp e2">2°-3°</span></td><td><span class="moat-strong">工作流 lock-in / 强</span></td><td>Now Assist ARR、大单数、ACV/RPO</td><td><span class="pri mid">中</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">ADBE<span class="name">Adobe</span></span></td><td class="mc">$99B</td><td>创意工具 + Firefly</td><td><span class="exp e3">3°</span></td><td><span class="moat-strong">创意 lock-in / 强</span></td><td>Firefly credit 货币化、Sora/Veo 替代威胁</td><td><span class="pri mid">中</span></td><td class="small"><span class="check">✓</span> 替代风险</td></tr>
+      <tr><td><span class="tic">INTU<span class="name">Intuit</span></span></td><td class="mc">$88B</td><td>TurboTax + QuickBooks + AI agent</td><td><span class="exp e3">3°</span></td><td><span class="moat-strong">税务+小微 / 强</span></td><td>AI agent 货币化、小微 ARPU</td><td><span class="pri low">低</span></td><td class="small">主业稳但 AI 是边缘</td></tr>
+      <tr><td><span class="tic">WDAY<span class="name">Workday</span></span></td><td class="mc">$32B</td><td>HCM + AI agent</td><td><span class="exp e3">3°</span></td><td><span class="moat-mid">HR lock-in / 中强</span></td><td>AI agent ARR、大客户净留存</td><td><span class="pri low">低</span></td><td class="small">同 INTU</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ ⑦数据/可观测 ============================ -->
+<section id="sec7" class="b7">
+  <div class="sec-bar"></div>
+  <h2><span class="badge">L4.5 · DATA</span>⑦ 数据 / 可观测 / 编排 (AI 原生软件)</h2>
+  <p class="sec-blurb">生成式 AI 的"管道层"。如果应用层 AI 真起来这层最受益，但目前估值已 price in 不少。</p>
+  <table>
+    <colgroup><col class="c-tic"><col class="c-mc"><col class="c-biz"><col class="c-exp"><col class="c-moat"><col class="c-var"><col class="c-pri"><col class="c-note"></colgroup>
+    <thead><tr><th>Ticker / 公司</th><th>市值 ~</th><th>一句话生意</th><th>AI 暴露</th><th>壁垒</th><th>关键业务变量</th><th>优先级</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tic">PLTR<span class="name">Palantir</span></span></td><td class="mc">$328B</td><td>AIP 政府+企业部署</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">工程师+部署 / 强</span></td><td>美国商业 ARR、政府续约、利润率</td><td><span class="pri high">高</span></td><td class="small"><span class="check">✓</span> 估值已极高</td></tr>
+      <tr><td><span class="tic">SNOW<span class="name">Snowflake</span></span></td><td class="mc">$60B</td><td>数据仓库 + Cortex AI</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">数据 lock-in / 中强</span></td><td>Cortex 收入、消费增速、Iceberg 影响</td><td><span class="pri mid">中</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">DDOG<span class="name">Datadog</span></span></td><td class="mc">$79B</td><td>可观测 + LLM 监控</td><td><span class="exp e2">2°</span></td><td><span class="moat-strong">集成广度 / 强</span></td><td>客户 LLM workload 占比、净留存</td><td><span class="pri mid">中</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">MDB<span class="name">MongoDB</span></span></td><td class="mc">$26B</td><td>NoSQL + vector search</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">开发者 / 中</span></td><td>Atlas 增长、向量搜索份额</td><td><span class="pri mid">中</span></td><td class="small">向量数据库竞争激烈</td></tr>
+      <tr><td><span class="tic">NET<span class="name">Cloudflare</span></span></td><td class="mc">$76B</td><td>CDN + Workers AI</td><td><span class="exp e2">2°</span></td><td><span class="moat-strong">网络+开发者 / 强</span></td><td>Workers AI ARR、大客户上量</td><td><span class="pri mid">中</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">CFLT<span class="name">Confluent</span></span></td><td class="mc borderline">$11B</td><td>Kafka 云服务</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">Kafka 主导 / 中</span></td><td>Cloud ARR、消费转型</td><td><span class="pri low">低</span></td><td class="small">阈值边缘</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ ⑧网络安全 ============================ -->
+<section id="sec8" class="b1">
+  <div class="sec-bar"></div>
+  <h2><span class="badge">L4.7 · SEC</span>⑧ 网络安全 (AI 用于威胁检测)</h2>
+  <p class="sec-blurb">AI 在这里是技术演进，不是估值催化。平台化是核心叙事。</p>
+  <table>
+    <colgroup><col class="c-tic"><col class="c-mc"><col class="c-biz"><col class="c-exp"><col class="c-moat"><col class="c-var"><col class="c-pri"><col class="c-note"></colgroup>
+    <thead><tr><th>Ticker / 公司</th><th>市值 ~</th><th>一句话生意</th><th>AI 暴露</th><th>壁垒</th><th>关键业务变量</th><th>优先级</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tic">CRWD<span class="name">CrowdStrike</span></span></td><td class="mc">$169B</td><td>端点 + AI 防御平台</td><td><span class="exp e2">2°</span></td><td><span class="moat-strong">平台+数据 / 强</span></td><td>模块附加率、2024 故障影响</td><td><span class="pri mid">中</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">PANW<span class="name">Palo Alto</span></span></td><td class="mc">$211B</td><td>平台化网络安全</td><td><span class="exp e2">2°</span></td><td><span class="moat-strong">多产品 lock-in / 强</span></td><td>平台化 ARR、CEO 推动节奏</td><td><span class="pri mid">中</span></td><td class="small">平台化最干净</td></tr>
+      <tr><td><span class="tic">ZS<span class="name">Zscaler</span></span></td><td class="mc">$29B</td><td>ZTNA + SASE</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">网络架构 / 中强</span></td><td>SASE 渗透、大客户净留存</td><td><span class="pri mid">中</span></td><td class="small">竞争激烈</td></tr>
+      <tr><td><span class="tic">FTNT<span class="name">Fortinet</span></span></td><td class="mc">$98B</td><td>防火墙 + SASE</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">硬件成本 / 中</span></td><td>SASE 转型、防火墙换代</td><td><span class="pri low">低</span></td><td class="small">硬件依赖</td></tr>
+      <tr><td><span class="tic">OKTA<span class="name">Okta</span></span></td><td class="mc">$16B</td><td>身份 (SSO + IAM)</td><td><span class="exp e3">3°</span></td><td><span class="moat-mid">SSO 标准 / 中</span></td><td>客户回流、AI agent 身份新场景</td><td><span class="pri low">低</span></td><td class="small">竞争+breach 阴影</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ ⑨DC 基建 ============================ -->
+<section id="sec9" class="b2">
+  <div class="sec-bar"></div>
+  <h2><span class="badge">L1.5 · INFRA</span>⑨ 数据中心基建 (电力 / 冷却 / 机电)</h2>
+  <p class="sec-blurb">"卖镐头的卖镐头"。VRT/GEV 是 1° 直接受益，其他是工业 + AI 两条腿。</p>
+  <table>
+    <colgroup><col class="c-tic"><col class="c-mc"><col class="c-biz"><col class="c-exp"><col class="c-moat"><col class="c-var"><col class="c-pri"><col class="c-note"></colgroup>
+    <thead><tr><th>Ticker / 公司</th><th>市值 ~</th><th>一句话生意</th><th>AI 暴露</th><th>壁垒</th><th>关键业务变量</th><th>优先级</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tic">VRT<span class="name">Vertiv</span></span></td><td class="mc">$126B</td><td>DC 电源 + 液冷</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">工程+产能 / 强</span></td><td>订单 backlog、毛利、液冷渗透</td><td><span class="pri high">高</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">GEV<span class="name">GE Vernova</span></span></td><td class="mc">$279B</td><td>燃气轮机 + 电网设备</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">燃气产能稀缺 / 强</span></td><td>燃气订单 backlog 排到 2028、电网升级 capex</td><td><span class="pri high">高</span></td><td class="small">AI 电荒最大受益</td></tr>
+      <tr><td><span class="tic">ETN<span class="name">Eaton</span></span></td><td class="mc">$152B</td><td>电力管理 + 配电</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">多元产品 / 强</span></td><td>DC 订单占比、北美电网投资</td><td><span class="pri mid">中</span></td><td class="small"><span class="check">✓</span></td></tr>
+      <tr><td><span class="tic">EMR<span class="name">Emerson</span></span></td><td class="mc">$76B</td><td>工业自动化 + 仪表</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">客户深度 / 中</span></td><td>AI 工厂订单、Aspen Tech 整合</td><td><span class="pri low">低</span></td><td class="small">老工业</td></tr>
+      <tr><td><span class="tic">PWR<span class="name">Quanta Services</span></span></td><td class="mc">$109B</td><td>输配电施工承包</td><td><span class="exp e2">2°</span></td><td><span class="moat-strong">工程能力 / 强</span></td><td>电网+DC backlog、人力供应</td><td><span class="pri mid">中</span></td><td class="small">电网建设受益方</td></tr>
+      <tr><td><span class="tic">HUBB<span class="name">Hubbell</span></span></td><td class="mc">$25B</td><td>电力 + 电气产品</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">客户绑定 / 中</span></td><td>utility/DC 订单</td><td><span class="pri low">低</span></td><td class="small">受益但非核心</td></tr>
+      <tr><td><span class="tic">NVT<span class="name">nVent</span></span></td><td class="mc">$27B</td><td>机柜 + 连接产品</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">客户认证 / 中</span></td><td>DC 订单 ramp、液冷机柜</td><td><span class="pri low">低</span></td><td class="small">小盘</td></tr>
+      <tr><td><span class="tic">AME<span class="name">Ametek</span></span></td><td class="mc">$51B</td><td>仪器仪表</td><td><span class="exp e3">3°</span></td><td><span class="moat-mid">客户深度 / 中</span></td><td>半导体+航空周期</td><td><span class="pri skip">ETF</span></td><td class="small">非 AI 主线</td></tr>
+      <tr><td><span class="tic">ITT<span class="name">ITT Inc.</span></span></td><td class="mc">$18B</td><td>工业流体 + 连接器</td><td><span class="exp e3">3°</span></td><td><span class="moat-mid">客户绑定 / 中</span></td><td>工业周期</td><td><span class="pri skip">ETF</span></td><td class="small">非 AI 主线</td></tr>
+      <tr><td><span class="tic">CMI<span class="name">Cummins</span></span></td><td class="mc">$88B</td><td>备用发电 + 工业引擎</td><td><span class="exp e2">2°</span></td><td><span class="moat-strong">品牌+客户 / 强</span></td><td>DC 备用发电订单、ramp 速度</td><td><span class="pri mid">中</span></td><td class="small">"DC 柴油机"题材</td></tr>
+      <tr><td><span class="tic">TT<span class="name">Trane Technologies</span></span></td><td class="mc">$100B</td><td>HVAC + 冷水机 (DC 冷却)</td><td><span class="exp e2">2°</span></td><td><span class="moat-strong">客户 lock-in / 强</span></td><td>DC 冷却订单、毛利</td><td><span class="pri mid">中</span></td><td class="small">DC 冷却受益面广</td></tr>
+      <tr><td><span class="tic">CARR<span class="name">Carrier</span></span></td><td class="mc">$52B</td><td>HVAC 全球</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">全球渠道 / 中</span></td><td>DC 冷却占比、毛利</td><td><span class="pri mid">中</span></td><td class="small">同 TT 但偏住宅</td></tr>
+      <tr><td><span class="tic">BE<span class="name">Bloom Energy</span></span></td><td class="mc">$86B</td><td>燃料电池 (DC 备电)</td><td><span class="exp e2">2°</span></td><td><span class="moat-weak">技术单点 / 弱</span></td><td>大单兑现 (Equinix/AWS)、毛利</td><td><span class="pri low">低</span></td><td class="small">高波动</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ ⑩核电/IPP ============================ -->
+<section id="sec10" class="b3">
+  <div class="sec-bar"></div>
+  <h2><span class="badge">L1.5 · POWER</span>⑩ 核电 / IPP (AI 用电方)</h2>
+  <p class="sec-blurb">AI 用电是 2025-2026 最强叙事之一。但 PPA 定价/容量市场是周期，估值已 price in 不少。</p>
+  <table>
+    <colgroup><col class="c-tic"><col class="c-mc"><col class="c-biz"><col class="c-exp"><col class="c-moat"><col class="c-var"><col class="c-pri"><col class="c-note"></colgroup>
+    <thead><tr><th>Ticker / 公司</th><th>市值 ~</th><th>一句话生意</th><th>AI 暴露</th><th>壁垒</th><th>关键业务变量</th><th>优先级</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tic">CEG<span class="name">Constellation Energy</span></span></td><td class="mc">$106B</td><td>核电运营商 (美国最大)</td><td><span class="exp e2">2°</span></td><td><span class="moat-strong">核电资产 / 强</span></td><td>核电 PPA 定价、DC 大单签约、监管</td><td><span class="pri high">高</span></td><td class="small">核电+DC PPA 标杆</td></tr>
+      <tr><td><span class="tic">VST<span class="name">Vistra</span></span></td><td class="mc">$53B</td><td>火电 + 核电 + 电池</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">资产组合 / 中强</span></td><td>PJM 容量市场、核电业务、煤电退役</td><td><span class="pri mid">中</span></td><td class="small">2024 涨幅大</td></tr>
+      <tr><td><span class="tic">NRG<span class="name">NRG Energy</span></span></td><td class="mc">$29B</td><td>综合电力零售</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">客户基础 / 中</span></td><td>DC PPA、零售毛利</td><td><span class="pri low">低</span></td><td class="small">没有核电资产</td></tr>
+      <tr><td><span class="tic">TLN<span class="name">Talen Energy</span></span></td><td class="mc">$17B</td><td>核电 + Amazon PPA</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">核电资产 / 中强</span></td><td>后续 DC PPA、监管批准</td><td><span class="pri mid">中</span></td><td class="small">单一大单依赖</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ ⑪DC REIT / Neocloud ============================ -->
+<section id="sec11" class="b4">
+  <div class="sec-bar"></div>
+  <h2><span class="badge">L2.5 · COLO</span>⑪ DC REIT / Neocloud (GPU 云)</h2>
+  <p class="sec-blurb">REIT 是稳态收租，Neocloud 是高杠杆赌 GPU 折旧周期。两者风险结构完全不同。</p>
+  <table>
+    <colgroup><col class="c-tic"><col class="c-mc"><col class="c-biz"><col class="c-exp"><col class="c-moat"><col class="c-var"><col class="c-pri"><col class="c-note"></colgroup>
+    <thead><tr><th>Ticker / 公司</th><th>市值 ~</th><th>一句话生意</th><th>AI 暴露</th><th>壁垒</th><th>关键业务变量</th><th>优先级</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tic">EQIX<span class="name">Equinix</span></span></td><td class="mc">$106B</td><td>互联型 DC REIT</td><td><span class="exp e1">1°</span></td><td><span class="moat-strong">互联生态 / 强</span></td><td>互联收入、扩容速度、利率</td><td><span class="pri mid">中</span></td><td class="small">DC REIT 龙头</td></tr>
+      <tr><td><span class="tic">DLR<span class="name">Digital Realty</span></span></td><td class="mc">$67B</td><td>批发型 DC REIT</td><td><span class="exp e1">1°</span></td><td><span class="moat-mid">物业+客户绑定 / 中</span></td><td>租赁速率、leasing volume、CRWV 客户占比</td><td><span class="pri mid">中</span></td><td class="small">和 CRWV 关联</td></tr>
+      <tr><td><span class="tic">IRM<span class="name">Iron Mountain</span></span></td><td class="mc">$38B</td><td>文件存储 + DC 转型</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">老业务转型 / 中</span></td><td>DC 业务占比、文件业务下滑</td><td><span class="pri low">低</span></td><td class="small">混业</td></tr>
+      <tr><td><span class="tic">CRWV<span class="name">CoreWeave</span></span></td><td class="mc">$58B</td><td>GPU-as-a-Service 云</td><td><span class="exp e1">1°</span></td><td><span class="moat-mid">NVDA 优待 / 中</span></td><td>客户集中度 (MSFT/OpenAI)、GPU 折旧、债务</td><td><span class="pri mid">中</span></td><td class="small">2025 IPO，高杠杆</td></tr>
+      <tr><td><span class="tic">NBIS<span class="name">Nebius</span></span></td><td class="mc">$55B</td><td>GPU 云 (Yandex spin-off)</td><td><span class="exp e1">1°</span></td><td><span class="moat-mid">NVDA 优待 / 中</span></td><td>客户多样化、capex ramp、欧洲扩展</td><td><span class="pri mid">中</span></td><td class="small">市值波动大</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ ⑫广告/推荐 AI ============================ -->
+<section id="sec12" class="b5">
+  <div class="sec-bar"></div>
+  <h2><span class="badge">L5 · ADTECH</span>⑫ 广告 / 推荐 AI</h2>
+  <p class="sec-blurb">推荐算法是 AI 最早、最稳的落地场景。Meta/Google 在 ⑤；这里是独立纯玩家。</p>
+  <table>
+    <colgroup><col class="c-tic"><col class="c-mc"><col class="c-biz"><col class="c-exp"><col class="c-moat"><col class="c-var"><col class="c-pri"><col class="c-note"></colgroup>
+    <thead><tr><th>Ticker / 公司</th><th>市值 ~</th><th>一句话生意</th><th>AI 暴露</th><th>壁垒</th><th>关键业务变量</th><th>优先级</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tic">APP<span class="name">AppLovin</span></span></td><td class="mc">$162B</td><td>移动广告 AI 引擎 (Axon)</td><td><span class="exp e1">1°</span></td><td><span class="moat-mid">Axon 模型 / 中强</span></td><td>Axon 持续 ROAS、电商扩张兑现、隐私监管</td><td><span class="pri high">高</span></td><td class="small">2024-25 涨疯</td></tr>
+      <tr><td><span class="tic">TTD<span class="name">Trade Desk</span></span></td><td class="mc borderline">$10.5B</td><td>开放互联网 DSP</td><td><span class="exp e2">2°</span></td><td><span class="moat-strong">第三方独立 / 强</span></td><td>Kokai 兑现、CTV 增长、Amazon 竞争</td><td><span class="pri mid">中</span></td><td class="small">2025 跌了不少</td></tr>
+      <tr><td><span class="tic">RDDT<span class="name">Reddit</span></span></td><td class="mc">$27B</td><td>社区 + 数据授权 (Google)</td><td><span class="exp e3">3°</span></td><td><span class="moat-strong">数据稀缺 / 强</span></td><td>数据授权续约、广告增长</td><td><span class="pri mid">中</span></td><td class="small">数据卖方角色独特</td></tr>
+      <tr><td><span class="tic">PINS<span class="name">Pinterest</span></span></td><td class="mc borderline">$11B</td><td>视觉发现 + 推荐</td><td><span class="exp e3">3°</span></td><td><span class="moat-mid">视觉数据 / 中</span></td><td>广告增长、用户增长</td><td><span class="pri low">低</span></td><td class="small">增长不温不火</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ ⑬自动驾驶/工业 ============================ -->
+<section id="sec13" class="b6">
+  <div class="sec-bar"></div>
+  <h2><span class="badge">L5.5 · APPLIED</span>⑬ 自动驾驶 / 机器人 / 工业 AI</h2>
+  <p class="sec-blurb">把 AI 真的"落地到物理世界"的尝试。落地周期长，估值波动大。</p>
+  <table>
+    <colgroup><col class="c-tic"><col class="c-mc"><col class="c-biz"><col class="c-exp"><col class="c-moat"><col class="c-var"><col class="c-pri"><col class="c-note"></colgroup>
+    <thead><tr><th>Ticker / 公司</th><th>市值 ~</th><th>一句话生意</th><th>AI 暴露</th><th>壁垒</th><th>关键业务变量</th><th>优先级</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tic">TSLA<span class="name">Tesla</span></span></td><td class="mc">$1.60T</td><td>EV + FSD + Optimus + Robotaxi</td><td><span class="exp e1">1°</span></td><td><span class="moat-mid">数据+垂直整合 / 中</span></td><td>Robotaxi 兑现、FSD take rate、车销量、Optimus</td><td><span class="pri high">高</span></td><td class="small">估值含极重 AI 期权</td></tr>
+      <tr><td><span class="tic">ISRG<span class="name">Intuitive Surgical</span></span></td><td class="mc">$155B</td><td>手术机器人 (da Vinci)</td><td><span class="exp e3">3°</span></td><td><span class="moat-strong">装机+耗材 / 极强</span></td><td>装机增速、SP/dV5 系统、耗材 ARPU</td><td><span class="pri mid">中</span></td><td class="small">医疗设备好生意</td></tr>
+      <tr><td><span class="tic">HON<span class="name">Honeywell</span></span></td><td class="mc">$144B</td><td>工业自动化 (拆分中)</td><td><span class="exp e3">3°</span></td><td><span class="moat-strong">多元 / 强</span></td><td>拆分时间表、各业务估值</td><td><span class="pri skip">ETF</span></td><td class="small">拆分类</td></tr>
+      <tr><td><span class="tic">ROK<span class="name">Rockwell Automation</span></span></td><td class="mc">$50B</td><td>工厂自动化</td><td><span class="exp e3">3°</span></td><td><span class="moat-strong">客户深度 / 强</span></td><td>工业自动化周期、北美制造回流</td><td><span class="pri skip">ETF</span></td><td class="small">非 AI 主线</td></tr>
+      <tr><td><span class="tic">IOT<span class="name">Samsara</span></span></td><td class="mc">$18B</td><td>车队 IoT + AI 安全</td><td><span class="exp e2">2°</span></td><td><span class="moat-mid">数据+网络效应 / 中</span></td><td>大客户净留存、毛利</td><td><span class="pri mid">中</span></td><td class="small">物联网 AI 标杆</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ ⑭消费 AI ============================ -->
+<section id="sec14" class="b7">
+  <div class="sec-bar"></div>
+  <h2><span class="badge">L5.5 · CONSUMER</span>⑭ 消费 / 游戏 AI</h2>
+  <p class="sec-blurb">本组在这一轮过滤里几乎被清空——DUOL/TEM 都跌破 $10B。AI 嵌消费产品的纯玩家变少了。</p>
+  <table>
+    <colgroup><col class="c-tic"><col class="c-mc"><col class="c-biz"><col class="c-exp"><col class="c-moat"><col class="c-var"><col class="c-pri"><col class="c-note"></colgroup>
+    <thead><tr><th>Ticker / 公司</th><th>市值 ~</th><th>一句话生意</th><th>AI 暴露</th><th>壁垒</th><th>关键业务变量</th><th>优先级</th><th>备注</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tic">RBLX<span class="name">Roblox</span></span></td><td class="mc">$35B</td><td>UGC 游戏平台 + AI 生成</td><td><span class="exp e2">2°</span></td><td><span class="moat-strong">平台+UGC / 强</span></td><td>DAU、毛利、AI 生成工具</td><td><span class="pri mid">中</span></td><td class="small"><span class="check">✓</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ SUMMARY ============================ -->
+<section id="summary">
+  <h2><span class="badge" style="background:rgba(125,184,255,.15);color:var(--accent)">SUMMARY</span>汇总 + 下一步建议</h2>
+
+  <div class="summary-grid">
+    <div class="sum-card"><div class="lbl">总覆盖</div><div class="val">90</div><div class="desc">家 ≥ $10B + AI 相关</div></div>
+    <div class="sum-card"><div class="lbl">补习优先级=高</div><div class="val" style="color:var(--green)">18</div><div class="desc">值得花时间做独立判断</div></div>
+    <div class="sum-card"><div class="lbl">已有独立分析 ✓</div><div class="val" style="color:var(--accent)">21</div><div class="desc">finance/*.html 已覆盖</div></div>
+    <div class="sum-card"><div class="lbl">建议跳过 → ETF</div><div class="val" style="color:var(--red)">11</div><div class="desc">用 SMH/QQQ/AIQ 接住</div></div>
+  </div>
+
+  <div class="alert note" style="margin-top:24px">
+    <h3>📋 "补习优先级=高" 的 18 家 (建议下一轮花时间的池子)</h3>
+    <p style="font-family:'SF Mono',monospace;font-size:13px;color:var(--gold);line-height:2">
+      NVDA · AMD · AVGO · TSM · ASML · MU · ANET · COHR · MSFT · GOOGL · AMZN · META · PLTR · VRT · GEV · CEG · APP · TSLA
+    </p>
+    <p style="color:var(--mute);font-size:12.5px;margin-top:6px">这 18 家中，<strong style="color:var(--ink)">11 家已有独立 HTML 分析</strong>（finance/ 目录）。<strong style="color:var(--ink)">真正下一步要补的</strong> = <strong style="color:var(--gold)">MU · ASML · GEV · CEG · APP · TSLA · COHR</strong> 共 7 家——这些是补习 ROI 最高的候选。COHR 是新加入的，CPO 龙头，但已涨 5x，下限明确性要重新评估。</p>
+  </div>
+
+  <div class="alert warn">
+    <h3>⚠ 用清单时要避免的几个陷阱</h3>
+    <ul>
+      <li><strong>不要把"过门槛=可以买"混为一谈</strong>。"补习优先级=高" 是说<em>值得花时间研究</em>，不是说<em>已经过原则1</em>。研究完依然可能结论是"圈外"</li>
+      <li><strong>不要为凑齐"6 层 AI 价值链"在每层都买一只</strong>。原则3 限制总持仓 7 个，分散到 AI 各层 = 等于买 AIQ ETF，不如直接买</li>
+      <li><strong>不要把 1° 暴露当成"质量"的代名词</strong>。MSFT/META/AAPL 是 1° 也是 3° (AI 占比不同的角度看法)，关键看你能不能预判其演化</li>
+      <li><strong>不要因为没列入而忽略</strong>：清单是按我对 MC 的记忆 +"AI 相关"宽定义。例如 MELI/BKNG 都是 AI 重要应用但不在这份"AI-themed"清单里——按你自己的圈圈选才是核心</li>
+      <li><strong>市值数据是约值</strong>，下注前必查 (Google Finance 一秒可得)</li>
+    </ul>
+  </div>
+
+  <div class="alert danger">
+    <h3>🛑 框架自检：这份清单可能溶解你的哪些闸门？</h3>
+    <ul>
+      <li><strong>"列了 85 家 = AI 行业很大很重要 = 我得多配置"</strong> ← 错。清单广度 ≠ 你的圈广度</li>
+      <li><strong>"补习优先级=高 = 我已经懂"</strong> ← 错。这是<em>研究价值高</em>，不是<em>研究完了</em></li>
+      <li><strong>"未在已研究 ✓ 列里 = 我应该尽快研究"</strong> ← 错。研究的顺序应该看<em>是否在你能力圈附近</em>而非<em>是否漏过</em></li>
+      <li><strong>看到 19 个"高优先级"产生 FOMO</strong> ← 框架里写了：performance envy 要主动识别。"AI 时代要持续学习"是溶解闸门的万能借口</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <p><strong>方法论</strong>：本清单按你 CLAUDE.md 的投资三原则框架的「原则1 候选池」用途构造，不替你过任何一条原则的判断。</p>
+  <p><strong>使用顺序建议</strong>：① 从 19 个高优先级里挑 2-3 个你最有兴趣的 → ② 花 1-2 周做 5 句话 + 下限 + 50% 加仓三个 test → ③ 通过的进入候选；不通过的明确为 ETF 接住对象 → ④ 通过的标的进入原则2 (壁垒+四维度) 和原则3 (仓位+价格纪律)。</p>
+  <p class="disclaimer">本文件由 Claude 基于截止 2026-01 的训练数据 + 公开行业理解整理。市值/经营状况/AI 暴露度分类均为近似判断，不构成任何投资建议。所有数字下注前自行核查。原则1 的执行权完全归你，本清单仅是候选池。</p>
+</footer>
+
+</div>
+</body>
+</html>

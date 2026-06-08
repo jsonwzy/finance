@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RBLX · Q1 CY2026 投资分析 | 研究备忘</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#0b1220; --panel:#111a2e; --panel2:#16213a; --line:#1f2c47;
+    --ink:#e6ecf5; --mute:#8aa0c2; --accent:#58a6ff; --gold:#f0b950;
+    --green:#2ecc71; --red:#e74c3c; --amber:#f39c12;
+    --hl:#1c2a4a; --rblx:#ff5e8a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .container{max-width:1180px;margin:0 auto;padding:32px 24px}
+  header.hero{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:32px}
+  .eyebrow{color:var(--rblx);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+  h1{font-size:34px;font-weight:700;margin-top:8px;letter-spacing:-.01em}
+  h1 .ticker{color:var(--gold);font-family:"SF Mono","Menlo",monospace;font-weight:700}
+  .subtitle{color:var(--mute);font-size:15px;margin-top:6px}
+  .rating-row{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+  .pill{background:var(--panel);border:1px solid var(--line);padding:8px 14px;border-radius:999px;font-size:13px;color:var(--mute)}
+  .pill strong{color:var(--ink);margin-left:6px}
+  .pill.rating{background:linear-gradient(135deg,#3b1730,#1f0f1c);border-color:#5a2742}
+  .pill.rating strong{color:var(--gold)}
+  .pill.warn{border-color:#5a3a14;background:#2a1d0a}
+  .pill.warn strong{color:var(--amber)}
+  .pill.danger{border-color:#5a1d24;background:#2a0d11}
+  .pill.danger strong{color:var(--red)}
+
+  section{margin-bottom:48px}
+  h2{font-size:22px;font-weight:700;margin-bottom:14px;display:flex;align-items:baseline;gap:10px}
+  h2 .num{color:var(--rblx);font-family:"SF Mono",monospace;font-size:14px}
+  h3{font-size:16px;font-weight:600;margin:18px 0 10px;color:var(--ink)}
+  p{color:#cdd7e8;margin-bottom:10px;font-size:14.5px}
+  p.lede{font-size:15.5px;color:var(--ink)}
+  ul{padding-left:22px;margin-bottom:10px}
+  ul li{color:#cdd7e8;margin-bottom:6px;font-size:14.5px}
+  strong{color:var(--ink)}
+  em{color:var(--gold);font-style:normal;font-weight:600}
+
+  .grid{display:grid;gap:14px}
+  .grid-4{grid-template-columns:repeat(4,1fr)}
+  .grid-3{grid-template-columns:repeat(3,1fr)}
+  .grid-2{grid-template-columns:repeat(2,1fr)}
+  @media (max-width:820px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr 1fr}}
+  @media (max-width:520px){.grid-4,.grid-3,.grid-2{grid-template-columns:1fr}}
+
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .kpi .label{color:var(--mute);font-size:12px;text-transform:uppercase;letter-spacing:.08em}
+  .kpi .value{font-size:24px;font-weight:700;margin-top:6px;font-family:"SF Mono",monospace}
+  .kpi .delta{font-size:13px;margin-top:4px}
+  .delta.pos{color:var(--green)}
+  .delta.neg{color:var(--red)}
+  .delta.neu{color:var(--mute)}
+
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden;font-size:13.5px}
+  thead{background:var(--panel2)}
+  th{padding:10px 12px;text-align:left;color:var(--mute);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line)}
+  td{padding:11px 12px;border-bottom:1px solid var(--line);color:#cdd7e8}
+  tr:last-child td{border-bottom:none}
+  td.num{font-family:"SF Mono",monospace;text-align:right}
+  tr.duol{background:rgba(255,94,138,0.08)}
+  tr.duol td{color:var(--ink);font-weight:500}
+  td.pos{color:var(--green)}
+  td.neg{color:var(--red)}
+  td.amber{color:var(--amber)}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px}
+  .panel-bull{border-color:#1d4a2a;background:linear-gradient(180deg,#0d1f15,var(--panel))}
+  .panel-bear{border-color:#4a1d24;background:linear-gradient(180deg,#1f0d11,var(--panel))}
+  .panel-bull h3{color:var(--green)}
+  .panel-bear h3{color:var(--red)}
+
+  .quote{border-left:3px solid var(--gold);padding:8px 16px;color:#cdd7e8;font-style:italic;margin:12px 0;background:rgba(240,185,80,0.04)}
+  .quote::before{content:'"';color:var(--gold);font-size:24px;margin-right:4px;font-weight:700;font-style:normal}
+
+  .chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;height:340px;position:relative}
+  .chart-title{font-size:13px;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;font-weight:600}
+
+  .scenario{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;position:relative;overflow:hidden}
+  .scenario.bear{border-top:3px solid var(--red)}
+  .scenario.base{border-top:3px solid var(--rblx)}
+  .scenario.bull{border-top:3px solid var(--green)}
+  .scenario .tag{font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:700}
+  .scenario.bear .tag{color:var(--red)}
+  .scenario.base .tag{color:var(--rblx)}
+  .scenario.bull .tag{color:var(--green)}
+  .scenario .px{font-size:32px;font-weight:700;font-family:"SF Mono",monospace;margin:6px 0}
+  .scenario .delta{font-size:14px}
+  .scenario ul{font-size:13px;padding-left:18px;margin-top:10px}
+
+  .sens-table th,.sens-table td{text-align:center;padding:8px 6px;font-family:"SF Mono",monospace}
+  .sens-table th{color:var(--rblx)}
+  .sens-table .row-label{text-align:left;color:var(--mute);font-family:inherit}
+  .heat-1{background:rgba(231,76,60,0.18)}
+  .heat-2{background:rgba(243,156,18,0.18)}
+  .heat-3{background:rgba(46,204,113,0.12)}
+  .heat-4{background:rgba(46,204,113,0.22)}
+  .heat-5{background:rgba(46,204,113,0.35);color:#fff;font-weight:600}
+
+  .timeline{display:flex;gap:12px;margin-top:14px;flex-wrap:wrap}
+  .stage{flex:1;min-width:200px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;border-left:3px solid var(--rblx)}
+  .stage .lbl{font-size:11px;color:var(--rblx);letter-spacing:.1em;font-weight:700;text-transform:uppercase}
+  .stage .px-tag{font-family:"SF Mono",monospace;font-size:18px;font-weight:700;margin-top:4px}
+  .stage .desc{font-size:13px;color:var(--mute);margin-top:4px}
+
+  .signal{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);margin-bottom:8px;font-size:14px}
+  .signal .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .signal.green .dot{background:var(--green)}
+  .signal.red .dot{background:var(--red)}
+  .signal.amber .dot{background:var(--amber)}
+
+  .vs-table th{color:var(--rblx)}
+  .vs-cell-rblx{color:var(--rblx);font-weight:600}
+  .vs-cell-duol{color:var(--accent);font-weight:600}
+
+  footer{border-top:1px solid var(--line);padding-top:24px;margin-top:48px;color:var(--mute);font-size:12.5px}
+  footer a{color:var(--rblx);text-decoration:none;display:block;margin:4px 0}
+  footer a:hover{text-decoration:underline}
+  .disclaimer{margin-top:18px;font-size:11.5px;color:#5d738f;font-style:italic}
+
+  .toc{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin-bottom:32px;font-size:13px}
+  .toc strong{color:var(--rblx);letter-spacing:.05em}
+  .toc a{color:#cdd7e8;text-decoration:none;margin-right:14px;display:inline-block;padding:2px 0}
+  .toc a:hover{color:var(--gold)}
+
+  .alert{background:linear-gradient(135deg,#3b1416,#1f0a0c);border:1px solid #6e2429;border-radius:10px;padding:14px 18px;margin:14px 0;font-size:14px}
+  .alert strong{color:var(--red)}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header class="hero">
+  <div class="eyebrow">Equity Research · Earnings Update</div>
+  <h1><span class="ticker">RBLX</span> · Roblox Corporation</h1>
+  <p class="subtitle">Q1 CY2026 财报后投资分析 · 报告日期 2026-05-06 · 财报日 2026-04-30</p>
+  <div class="rating-row">
+    <span class="pill rating">观点 <strong>Cautious Constructive · 小仓位长期</strong></span>
+    <span class="pill">现价 <strong>$45.50</strong></span>
+    <span class="pill">12个月目标 <strong>$65 (基准) / $110 (牛市)</strong></span>
+    <span class="pill danger">风险 <strong>SBC 稀释 + Age-gating 余波</strong></span>
+    <span class="pill">市值 / EV <strong>$31.5B / $25.3B</strong></span>
+  </div>
+</header>
+
+<div class="toc">
+  <strong>目录 ·</strong>
+  <a href="#tldr">核心观点</a>
+  <a href="#snapshot">业绩快照</a>
+  <a href="#guide-cut">Guide 大砍</a>
+  <a href="#business">业务剖析</a>
+  <a href="#comps">可比公司</a>
+  <a href="#dcf">DCF / 情景</a>
+  <a href="#bullbear">牛熊辩论</a>
+  <a href="#analysts">卖方观点</a>
+  <a href="#vs-duol">RBLX vs DUOL</a>
+  <a href="#action">操作建议</a>
+</div>
+
+<!-- ============================ TL;DR ============================ -->
+<section id="tldr">
+  <h2><span class="num">01</span>核心观点（TL;DR）</h2>
+  <p class="lede">RBLX Q1 实际数据强劲：收入 +39%、bookings +43%、DAU 132M（+35%）、FCF $596M（+40%）。但管理层<em> FY26 bookings 指引从 +22-26% 砍到 +8-12%</em>——少了 ~$1B——市场以一次 -18% 砍仓回应。</p>
+  <p class="lede">指引砍的<em>不是基本面破裂</em>，而是<strong> age-gating（年龄验证安全措施）</strong>对用户获取的暂时冲击。51% 全球 DAU、65% 美国 DAU 已完成验证。管理层预期 Q3 恢复增长。这是一个<em>"主动选择短痛换长期合规护城河"</em>的故事。</p>
+  <p class="lede"><strong>结论</strong>：从历史峰值 $150 跌到 $45（-70%），估值 EV/Bookings 3.4x · FCF yield 3.6% · 净现金 $6.2B 占市值 20%——已反映显著悲观。但 RBLX 仍 GAAP 亏损（SBC 巨大），与 DUOL 不同——这是<em>"长期 option 而非现金奶牛"</em>。<strong>建议小仓位（1-2%）建仓，等 Q3 恢复信号</strong>。</p>
+</section>
+
+<!-- ============================ Q1 Snapshot ============================ -->
+<section id="snapshot">
+  <h2><span class="num">02</span>Q1 CY2026 业绩快照</h2>
+
+  <div class="grid grid-4">
+    <div class="kpi"><div class="label">收入</div><div class="value">$1.44B</div><div class="delta pos">+39% YoY · beat</div></div>
+    <div class="kpi"><div class="label">Bookings</div><div class="value">$1.73B</div><div class="delta pos">+43% YoY · beat</div></div>
+    <div class="kpi"><div class="label">DAU</div><div class="value">132M</div><div class="delta pos">+35% YoY · 减速</div></div>
+    <div class="kpi"><div class="label">使用时长</div><div class="value">31B hrs</div><div class="delta pos">+43% YoY</div></div>
+    <div class="kpi"><div class="label">Adj EBITDA</div><div class="value">$99M</div><div class="delta pos">+71% YoY</div></div>
+    <div class="kpi"><div class="label">GAAP 净亏损</div><div class="value">-$248M</div><div class="delta neg">从 -$216M 扩大</div></div>
+    <div class="kpi"><div class="label">自由现金流</div><div class="value">$596M</div><div class="delta pos">+40% YoY</div></div>
+    <div class="kpi"><div class="label">现金 & 投资</div><div class="value">$6.2B</div><div class="delta pos">+$1.7B YoY</div></div>
+  </div>
+
+  <h3>结构性看点</h3>
+  <ul>
+    <li><strong>开发者支付 DevEx</strong>：$423M（占 bookings 29%），+50% YoY——创作者经济在繁荣</li>
+    <li><strong>国际化爆发</strong>：日本 DAU +96%，印度 +84%，国际整体 +40%（vs 美国/加拿大 +17%）</li>
+    <li><strong>内容多样化</strong>：Top 10 之外的游戏占总消费增长 65%——分散风险</li>
+    <li><strong>AI Tools 渗透</strong>：Top 1000 创作者中 ~50% 使用 Roblox Assistant / MCP</li>
+  </ul>
+
+  <div class="chart-wrap" style="margin-top:14px">
+    <div class="chart-title">Q1 实际增速 vs FY26 隐含路径——前瞻 deceleration 严重</div>
+    <canvas id="growthChart"></canvas>
+  </div>
+</section>
+
+<!-- ============================ Guidance Cut ============================ -->
+<section id="guide-cut">
+  <h2><span class="num">03</span>FY26 指引：大砍 ~$1B Bookings</h2>
+
+  <div class="alert"><strong>核心数字</strong>：FY26 bookings 指引<strong>从 +22-26%（隐含 ~$8.4B）砍到 +8-12%（$7.33-7.60B）</strong>——减少约 $1B。这是市场 -18% 反应的根本原因。</div>
+
+  <table>
+    <thead>
+      <tr><th>指标</th><th>原 FY26 指引</th><th>新 FY26 指引</th><th>YoY</th><th>解读</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>收入</td><td class="num">~$6.2B+</td><td class="num">$5.87 - 6.14B</td><td class="num pos">+20-25%</td><td>仍较强，但低于此前买方预期</td></tr>
+      <tr class="duol"><td>Bookings</td><td class="num">+22-26% (~$8.4B)</td><td class="num neg">$7.33 - 7.60B</td><td class="num neg">+8-12%</td><td><strong>核心冲击</strong>：少 ~$1B</td></tr>
+      <tr><td>Adj EBITDA</td><td class="num">~$400M+</td><td class="num">$185 - 325M</td><td class="num neg">区间下移大</td><td>固定成本 deleveraging（占 75%）</td></tr>
+      <tr><td>FCF</td><td class="num">~$1.5B</td><td class="num">$1.05 - 1.28B</td><td class="num neg">-22% 到 -6%</td><td><strong>FCF 同比下降</strong>是首次</td></tr>
+      <tr><td>Capex</td><td class="num">$450M</td><td class="num">$470 - 520M</td><td class="num neu">+5%</td><td>基础设施投入持续</td></tr>
+      <tr class="duol"><td>Q2 Bookings YoY</td><td class="num">—</td><td class="num neg">+8-12%</td><td class="num neg">大幅减速</td><td>从 Q1 +43% 直接跳水</td></tr>
+    </tbody>
+  </table>
+
+  <h3>为什么砍这么多？Age-Gating 详解</h3>
+  <ul>
+    <li><strong>2026年1月推出全球年龄验证</strong>——未验证用户的聊天功能受限，已验证用户也因联系人减少而降低使用</li>
+    <li>App Store 评分受影响 → 自然新增减速 → 顶部漏斗收缩</li>
+    <li>截至 Q1 末：全球 51% DAU 已完成验证，美国 65%</li>
+    <li><strong>预期 Q2 DAU 环比下降</strong>，Q3 恢复增长——管理层有明确时间表</li>
+    <li>6 月还要推全球账户体系；Kids/Select 账户在 H2 推出</li>
+  </ul>
+
+  <div class="quote">虽然激进的安全推进降低了 2026 短期增速，但它让平台从根本上更好——并放大长期增长潜力，因为更精准的内容定向。— CEO Dave Baszucki</div>
+
+  <p>这段话翻译成投资语言：<em>"我们在用 12 个月的财务痛苦换 5-10 年的监管壁垒和广告主友好度。"</em>——能不能信，是 thesis 的核心。</p>
+</section>
+
+<!-- ============================ Business Deep Dive ============================ -->
+<section id="business">
+  <h2><span class="num">04</span>业务深度剖析</h2>
+
+  <div class="grid grid-2">
+    <div class="panel">
+      <h3>① 创作者经济护城河 (UGC 飞轮)</h3>
+      <ul>
+        <li>DevEx Q1 +50% YoY，达 $423M（占 bookings 29%）</li>
+        <li>2026 年 6 月 8 日起，<strong>18+ 创作者 DevEx 分成从 26.6% 涨到 37.8%</strong>——大涨 11 点</li>
+        <li>Top 1000 创作者 ~50% 使用 AI 工具压缩开发周期</li>
+        <li>Top 10 外的游戏占消费增长 65%（去年还是 ~40%）——内容长尾健康</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h3>② Age-Gating 是双刃剑</h3>
+      <ul>
+        <li><strong>负面（短期）</strong>：DAU 增长从 +70% 降到 +35%，Q2 还会环比下降</li>
+        <li><strong>正面（长期）</strong>：合规地位 → 广告主友好 → 18+ 内容货币化解锁</li>
+        <li>这是 Meta（隐私政策）、TikTok（监管）走过的路——短期估值压制，长期 moat 加深</li>
+        <li>关键看 Q3 是否如约恢复增长——这是 thesis 验证点</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h3>③ 国际化引擎已点燃</h3>
+      <ul>
+        <li>日本 DAU <strong>+96% YoY</strong>，使用时长 +101%</li>
+        <li>印度 DAU <strong>+84% YoY</strong>，使用时长 +91%</li>
+        <li>国际整体 +40% vs 美加 +17%——拐点已现</li>
+        <li>美国市场已较成熟，未来增长靠国际——这点比 DUOL 更明确</li>
+      </ul>
+    </div>
+
+    <div class="panel">
+      <h3>④ AI 与 Roblox Reality Project</h3>
+      <ul>
+        <li>400+ 自研模型，1.5M+ 推理/秒</li>
+        <li>"Agentic" 游戏开发：Assistant 调度多个 building agents 自主测试 + 交付</li>
+        <li>Mesh/程序生成 + NPC 测试 agents 让小团队产出 AAA 内容</li>
+        <li>Roblox Reality Project：超大规模多人模拟 + 边缘渲染 → 元宇宙级体验</li>
+        <li>这些是 RBLX 区别于普通 UGC 的差异</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>⚠ 不可忽视的"暗物质"：股权激励 (SBC)</h3>
+  <p>RBLX 的 GAAP 亏损（-$248M Q1）vs FCF（+$596M Q1）的巨大差距，主要来自<strong>每年 ~$700-900M 的 SBC</strong>。这意味着：</p>
+  <ul>
+    <li>"FCF" 不等于股东 owner earnings——SBC 是<em>真实</em>的股权稀释成本</li>
+    <li>每年股本稀释 ~3-4%</li>
+    <li>真实 owner earnings ≈ FCF − SBC ≈ $1.16B − $850M ≈ $310M</li>
+    <li>用 owner earnings 计算的 P/E 大约是 100x——比"FCF yield 3.6%"显示得贵很多</li>
+  </ul>
+  <p>这是评估 RBLX 估值时必须做的<em>调整</em>——也是这家公司估值争议大的根本原因。</p>
+</section>
+
+<!-- ============================ Comps ============================ -->
+<section id="comps">
+  <h2><span class="num">05</span>可比公司分析（May 2026）</h2>
+  <p>RBLX 是混合体——UGC 平台 + 游戏 + 社交 + 广告。我用三类 peers 对照：(a) 大型平台（META），(b) 游戏（TTWO/EA），(c) 社交/视频（SNAP/PINS）。</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>公司</th><th>Mkt Cap</th><th>Bookings/Rev Growth</th><th>FCF Margin</th>
+        <th>EV/Sales (NTM)</th><th>EV/Adj EBITDA</th><th>FCF Yield</th><th>GAAP 盈利</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="duol">
+        <td><strong>RBLX</strong></td><td class="num">$31.5B</td><td class="num pos">+10% (cut)</td><td class="num">~18%</td>
+        <td class="num">4.3x</td><td class="num neg">~100x</td><td class="num">3.6%</td><td class="num neg">亏损</td>
+      </tr>
+      <tr>
+        <td>META</td><td class="num">~$1.6T</td><td class="num">+12%</td><td class="num">~30%</td>
+        <td class="num">8.5x</td><td class="num">15x</td><td class="num">~4%</td><td class="num pos">盈利</td>
+      </tr>
+      <tr>
+        <td>SNAP (Snap)</td><td class="num">$13B</td><td class="num">+10%</td><td class="num">~5%</td>
+        <td class="num">2.2x</td><td class="num">35x</td><td class="num">~2%</td><td class="num neg">亏损</td>
+      </tr>
+      <tr>
+        <td>PINS (Pinterest)</td><td class="num">$24B</td><td class="num">+15%</td><td class="num">~25%</td>
+        <td class="num">5.4x</td><td class="num">17x</td><td class="num">~5%</td><td class="num pos">盈利</td>
+      </tr>
+      <tr>
+        <td>TTWO (Take-Two)</td><td class="num">$30B</td><td class="num">+8%</td><td class="num">~10%</td>
+        <td class="num">4.8x</td><td class="num">22x</td><td class="num">~2%</td><td class="num">混合</td>
+      </tr>
+      <tr>
+        <td>EA</td><td class="num">$40B</td><td class="num">+5%</td><td class="num">~22%</td>
+        <td class="num">5.0x</td><td class="num">15x</td><td class="num">~5%</td><td class="num pos">盈利</td>
+      </tr>
+      <tr>
+        <td>U (Unity)</td><td class="num">$10B</td><td class="num">+8%</td><td class="num">~5%</td>
+        <td class="num">5.0x</td><td class="num neg">~50x</td><td class="num">~1%</td><td class="num neg">亏损</td>
+      </tr>
+      <tr>
+        <td>DUOL <span style="color:var(--accent)">←参考</span></td><td class="num">$5.2B</td><td class="num pos">+27%</td><td class="num pos">50%</td>
+        <td class="num">3.4x</td><td class="num">13x</td><td class="num">6.8%</td><td class="num pos">盈利</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>读出来三件事</h3>
+  <ol style="padding-left:20px;color:#cdd7e8;font-size:14.5px">
+    <li><strong>RBLX EV/Sales 4.3x 不算便宜</strong>——SNAP（亏损同业）只有 2.2x。但 RBLX 增长更快、平台规模更大</li>
+    <li><strong>EV/EBITDA ~100x 看似贵</strong>，但 Adj EBITDA 在最低点（FY27 应大幅恢复）——估值的"分母"是被压制的</li>
+    <li><strong>GAAP 盈利缺失是估值天花板</strong>——比起 META、PINS、EA 等盈利平台，RBLX 估值溢价依赖未来证明 GAAP 转正</li>
+  </ol>
+
+  <div class="chart-wrap" style="margin-top:14px">
+    <div class="chart-title">EV/Sales (NTM) vs Revenue Growth — RBLX 在偏贵区</div>
+    <canvas id="compsChart"></canvas>
+  </div>
+</section>
+
+<!-- ============================ DCF ============================ -->
+<section id="dcf">
+  <h2><span class="num">06</span>DCF 模型与情景分析</h2>
+
+  <h3>核心假设（Base Case）</h3>
+  <table>
+    <thead>
+      <tr><th>FY</th><th>Bookings</th><th>YoY</th><th>FCF Margin</th><th>FCF ($M)</th><th>Owner Earn (FCF − SBC)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>FY26 (guide)</td><td class="num">$7.47B</td><td class="num pos">+10%</td><td class="num">15.5%</td><td class="num">$1,160</td><td class="num">~$310</td></tr>
+      <tr><td>FY27E</td><td class="num">$8.81B</td><td class="num pos">+18%</td><td class="num">17%</td><td class="num">$1,500</td><td class="num">~$600</td></tr>
+      <tr><td>FY28E</td><td class="num">$10.30B</td><td class="num pos">+17%</td><td class="num">19%</td><td class="num">$1,960</td><td class="num">~$1,000</td></tr>
+      <tr><td>FY29E</td><td class="num">$11.74B</td><td class="num pos">+14%</td><td class="num">22%</td><td class="num">$2,580</td><td class="num">~$1,600</td></tr>
+      <tr><td>FY30E</td><td class="num">$13.03B</td><td class="num">+11%</td><td class="num">24%</td><td class="num">$3,130</td><td class="num">~$2,150</td></tr>
+      <tr><td>FY31E (Terminal)</td><td class="num">$14.20B</td><td class="num">+9%</td><td class="num">25%</td><td class="num">$3,550</td><td class="num">~$2,550</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:13px;color:var(--mute);margin-top:8px">关键假设：WACC 10.5% · Terminal exit 16x EBITDA-equivalent · 净现金 $6.2B 加回 · 流通股 ~700M（5年稀释至 ~750M）</p>
+
+  <h3>三情景估值</h3>
+  <div class="grid grid-3">
+    <div class="scenario bear">
+      <div class="tag">BEAR · 35%</div>
+      <div class="px">$40</div>
+      <div class="delta neg">-12% vs $45.50</div>
+      <ul>
+        <li>WACC 11.5%, exit 12x</li>
+        <li>FY27 bookings 仅 +12%（恢复弱）</li>
+        <li>Age-gating 影响延续到 H2</li>
+        <li>FCF margin 卡在 20%</li>
+        <li>SBC 持续高位，每年稀释 4%</li>
+      </ul>
+    </div>
+    <div class="scenario base">
+      <div class="tag">BASE · 45%</div>
+      <div class="px">$65</div>
+      <div class="delta pos">+43% vs $45.50</div>
+      <ul>
+        <li>WACC 10.5%, exit 16x</li>
+        <li>Q3 DAU 恢复增长（如 guide）</li>
+        <li>FY27 bookings +18%</li>
+        <li>FCF margin 升至 22%</li>
+        <li>国际化和 18+ 内容兑现</li>
+      </ul>
+    </div>
+    <div class="scenario bull">
+      <div class="tag">BULL · 20%</div>
+      <div class="px">$110</div>
+      <div class="delta pos">+142% vs $45.50</div>
+      <ul>
+        <li>WACC 9%, exit 20x</li>
+        <li>FY27 bookings +25% (V 型反弹)</li>
+        <li>广告业务规模化</li>
+        <li>Reality Project / AI 元素溢价</li>
+        <li>SBC 控制 + 真转盈利</li>
+      </ul>
+    </div>
+  </div>
+
+  <p style="margin-top:16px"><strong>概率加权目标价</strong>：$40 × 35% + $65 × 45% + $110 × 20% = <em>$65</em>（+43% vs $45.50）</p>
+
+  <h3 style="margin-top:24px">敏感性矩阵：每股内在价值（基准 FCF 路径）</h3>
+  <table class="sens-table">
+    <thead>
+      <tr><th class="row-label">WACC ↓ / Exit Multiple →</th><th>10x</th><th>13x</th><th>16x</th><th>19x</th><th>22x</th></tr>
+    </thead>
+    <tbody>
+      <tr><td class="row-label">9.0%</td><td class="heat-3">$53</td><td class="heat-4">$65</td><td class="heat-5">$77</td><td class="heat-5">$89</td><td class="heat-5">$101</td></tr>
+      <tr><td class="row-label">9.5%</td><td class="heat-2">$50</td><td class="heat-3">$61</td><td class="heat-4">$72</td><td class="heat-4">$84</td><td class="heat-5">$95</td></tr>
+      <tr><td class="row-label" style="color:var(--rblx);font-weight:600">10.5% (Base)</td><td class="heat-2">$44</td><td class="heat-3">$54</td><td class="heat-3" style="font-weight:700">$65</td><td class="heat-4">$75</td><td class="heat-4">$85</td></tr>
+      <tr><td class="row-label">11.0%</td><td class="heat-1">$41</td><td class="heat-2">$51</td><td class="heat-3">$61</td><td class="heat-4">$71</td><td class="heat-4">$80</td></tr>
+      <tr><td class="row-label">11.5%</td><td class="heat-1">$38</td><td class="heat-2">$48</td><td class="heat-2">$57</td><td class="heat-3">$66</td><td class="heat-4">$76</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12.5px;color:var(--mute);margin-top:8px">读法：当前 $45.50 处于 WACC 11-11.5% / Exit 10-13x 的偏悲观角落。市场已 price-in age-gating 余波延续 + 增长结构性减速。</p>
+
+  <div class="chart-wrap" style="margin-top:14px">
+    <div class="chart-title">每股价值情景概率加权</div>
+    <canvas id="scenarioChart"></canvas>
+  </div>
+</section>
+
+<!-- ============================ Bull / Bear ============================ -->
+<section id="bullbear">
+  <h2><span class="num">07</span>牛 / 熊辩论</h2>
+  <div class="grid grid-2">
+    <div class="panel panel-bull">
+      <h3>BULL CASE</h3>
+      <ul>
+        <li><strong>UGC 飞轮规模化</strong>：132M DAU + 创作者 +50% DevEx 涨薪 → 平台经济正循环</li>
+        <li><strong>$6.2B 净现金</strong>占市值 20%——下行保护极强</li>
+        <li><strong>国际化引擎</strong>：日本 +96%, 印度 +84% → 未来 5 年增长发动机</li>
+        <li><strong>Age-gating 长期是 moat</strong>：合规护城河 + 18+ 货币化解锁</li>
+        <li>18+ DevEx 分成涨到 37.8% → 解锁高质量成人内容</li>
+        <li>AI 工具让小团队做 AAA 内容——内容供给侧革命</li>
+        <li>Roblox Reality Project 是元宇宙级别的可选期权</li>
+        <li>当前估值已折扣 ~70% vs 峰值 $150</li>
+      </ul>
+    </div>
+    <div class="panel panel-bear">
+      <h3>BEAR CASE</h3>
+      <ul>
+        <li><strong>SBC 巨大且持续</strong>：~$850M/年 = "owner earnings" 仅是 FCF 的 ~25%</li>
+        <li><strong>GAAP 仍亏损</strong>且扩大——估值无 P/E 锚</li>
+        <li>Age-gating 影响可能比 guide 更长——"Q3 恢复"是预测，不是事实</li>
+        <li>DAU 增速从 +70% 跌到 +35%，结构性还是周期性？无人能证</li>
+        <li>儿童用户监管风险持续——欧盟、印度、其他司法区都在跟进</li>
+        <li>FY26 FCF 同比<em>下降</em>是首次——增长故事破裂迹象</li>
+        <li>GS 维持买入 $125 vs Wedbush 砍到 $90 — 卖方分歧大</li>
+        <li>Reality Project / 元宇宙仍是<em>愿景</em>，不是营收</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ Wall Street View ============================ -->
+<section id="analysts">
+  <h2><span class="num">08</span>卖方观点（Wall Street View）</h2>
+  <p>Q1 2026 财报后<em>主流投行集体大砍目标价</em>——这是市场极度悲观的直接证据，但也意味着任何"没那么糟"的数据点都会带来 re-rating 空间。</p>
+
+  <div class="alert"><strong>整体共识</strong>：27 家投行覆盖 · <em>1 Strong Buy / 14 Buy / 11 Hold / 1 Sell</em> · 平均目标价 ~$90-108（vs 当前 $45.50）→ 隐含 +98-138% 共识上行空间</div>
+
+  <h3>财报后主要评级动作</h3>
+  <table>
+    <thead>
+      <tr><th>投行</th><th>评级</th><th>目标价（旧 → 新）</th><th>降幅</th><th>核心论点</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Bank of America</td>
+        <td class="amber">Buy → <strong style="color:var(--amber)">Neutral</strong></td>
+        <td class="num neg">$165 → $48</td>
+        <td class="num neg">-71%</td>
+        <td>Age verification + 算法变更损害用户参与；最悲观</td>
+      </tr>
+      <tr>
+        <td>JPMorgan</td>
+        <td class="num">Neutral</td>
+        <td class="num neg">$75 → $50</td>
+        <td class="num neg">-33%</td>
+        <td>持续中立；guide cut 是结构性而非周期性</td>
+      </tr>
+      <tr>
+        <td>Goldman Sachs</td>
+        <td class="pos">Buy（维持）</td>
+        <td class="num neg">$125 → $65</td>
+        <td class="num neg">-48%</td>
+        <td>仍看好长期 UGC 飞轮 + 国际化</td>
+      </tr>
+      <tr>
+        <td>Morgan Stanley</td>
+        <td class="pos">Overweight（维持）</td>
+        <td class="num neg">$140 → $62</td>
+        <td class="num neg">-56%</td>
+        <td>砍价但维持评级——对 thesis 仍有信心</td>
+      </tr>
+      <tr>
+        <td>Wedbush</td>
+        <td class="num">Outperform</td>
+        <td class="num neg">$80 → $65</td>
+        <td class="num neg">-19%</td>
+        <td>降幅最小——已较早调整预期</td>
+      </tr>
+      <tr>
+        <td>BTIG Research</td>
+        <td class="amber">Buy → <strong style="color:var(--amber)">Neutral</strong></td>
+        <td class="num">—</td>
+        <td class="num">—</td>
+        <td>降级；担心 H2 不一定如管理层描述恢复</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>共识价格分布（27家覆盖）</h3>
+  <div class="chart-wrap" style="margin-top:14px">
+    <div class="chart-title">分析师评级分布（财报后）</div>
+    <canvas id="ratingsChart"></canvas>
+  </div>
+
+  <h3>怎么读这些卖方动作</h3>
+  <ul>
+    <li><strong>BofA $48 是最悲观 anchor</strong>——基本是当前价，意味着市场已经接近"完全 price-in 长期 thesis 破裂"的悲观水平</li>
+    <li><strong>GS / MS 维持买入但砍价 ~50%</strong>——这是典型的"承认短期痛苦、但长期 thesis 不变"姿态。这两家是<em>保留 thesis 完整性</em>的关键票</li>
+    <li><strong>分析师共识 PT $90-108</strong> 高于当前价 ~100%——和我自己的 Base case $65 比，市场卖方更乐观（可能反映他们没有完全处理 SBC 稀释）</li>
+    <li><strong>关键观察</strong>：没有一家投行下调到"Sell" / "Underweight"——说明<em>没人认为故事彻底破了</em>，主流是"等待数据验证"姿态</li>
+    <li><strong>非对称性信号</strong>：当 27 家投行有 11 家降级到 Hold，且平均价已被砍 50%+，<em>未来重新升级到 Buy</em> 的非对称性较好——只要 Q3 数据不糟</li>
+  </ul>
+
+  <h3>我的目标价 vs 卖方共识</h3>
+  <div class="grid grid-3">
+    <div class="kpi"><div class="label">本研究 Base Case</div><div class="value" style="color:var(--rblx)">$65</div><div class="delta neu">+43% vs 现价</div></div>
+    <div class="kpi"><div class="label">卖方平均（TipRanks）</div><div class="value" style="color:var(--accent)">$90.40</div><div class="delta neu">+99% vs 现价</div></div>
+    <div class="kpi"><div class="label">最悲观（BofA）</div><div class="value" style="color:var(--red)">$48</div><div class="delta neu">+5% vs 现价</div></div>
+  </div>
+  <p style="margin-top:10px">我的 $65 比卖方共识保守约 28%，主要因为我对 SBC 稀释和 GAAP 转盈利节奏更谨慎。<em>如果你信卖方共识，则上行空间更大</em>。</p>
+</section>
+
+<!-- ============================ RBLX vs DUOL ============================ -->
+<section id="vs-duol">
+  <h2><span class="num">09</span>RBLX vs DUOL：长期持有该选哪个？</h2>
+  <p>两家都是<em>"被砍仓但仍有飞轮"</em>的故事，但本质很不同：</p>
+
+  <table class="vs-table">
+    <thead>
+      <tr><th>维度</th><th class="vs-cell-rblx">RBLX</th><th class="vs-cell-duol">DUOL</th><th>胜方</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>当前增速</td><td class="num pos">Bookings +43% / DAU +35%</td><td class="num pos">Rev +27% / DAU +21%</td><td>RBLX</td>
+      </tr>
+      <tr>
+        <td>近期 guide 走向</td><td class="num neg">大砍（22%→10%）</td><td class="num amber">重申，未上调</td><td>DUOL</td>
+      </tr>
+      <tr>
+        <td>GAAP 盈利</td><td class="num neg">亏损 -$248M</td><td class="num pos">盈利</td><td>DUOL</td>
+      </tr>
+      <tr>
+        <td>FCF Margin (FY26 guide)</td><td class="num">~18%</td><td class="num pos">~29%</td><td>DUOL</td>
+      </tr>
+      <tr>
+        <td>SBC / 稀释</td><td class="num neg">~$850M/年, ~3-4% 稀释</td><td class="num">较温和</td><td>DUOL</td>
+      </tr>
+      <tr>
+        <td>净现金占市值</td><td class="num pos">20% ($6.2B / $31.5B)</td><td class="num pos">19% ($1B / $5.2B)</td><td>持平</td>
+      </tr>
+      <tr>
+        <td>EV/Sales (NTM)</td><td class="num">4.3x</td><td class="num">3.4x</td><td>DUOL</td>
+      </tr>
+      <tr>
+        <td>护城河类型</td><td class="num">UGC + 创作者经济</td><td class="num">AI 内容引擎 + 习惯</td><td>互补</td>
+      </tr>
+      <tr>
+        <td>主要风险</td><td class="num neg">监管 + 儿童用户敏感</td><td class="num neg">AI 通用模型替代</td><td>—</td>
+      </tr>
+      <tr>
+        <td>下行保护</td><td class="num pos">$6.2B 现金堡垒</td><td class="num">$1B 现金</td><td>RBLX</td>
+      </tr>
+      <tr>
+        <td>潜在上行倍数 (Bull)</td><td class="num pos">+142%</td><td class="num pos">+68%</td><td>RBLX</td>
+      </tr>
+      <tr>
+        <td>下行风险倍数 (Bear)</td><td class="num neg">-12%</td><td class="num neg">-31%</td><td>RBLX</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>结论：买相同还是买不同？</h3>
+  <ul>
+    <li><strong>如果只能选一个</strong>：DUOL 更适合"现金奶牛 + 估值修复"风格——已盈利、SBC 温和、估值更便宜</li>
+    <li><strong>如果买组合</strong>：两家可同时持有——风险并不重叠（DUOL 怕 AI 替代，RBLX 怕监管）</li>
+    <li><strong>RBLX 是更高 beta 的押注</strong>：上下行非对称性更好（-12% / +142%），但需要承受 GAAP 亏损 + SBC 稀释的不舒适</li>
+    <li><strong>最佳组合</strong>：DUOL 仓位 2-4%（稳定 compounder）+ RBLX 仓位 1-2%（option 期权）= 总互联网/edtech 风格暴露 3-6%</li>
+  </ul>
+</section>
+
+<!-- ============================ Action Plan ============================ -->
+<section id="action">
+  <h2><span class="num">10</span>操作建议（长期持仓视角）</h2>
+
+  <h3>3 批建仓节奏</h3>
+  <div class="timeline">
+    <div class="stage">
+      <div class="lbl">第 1 批 · 现在</div>
+      <div class="px-tag">~$45.50 · 1/4 仓</div>
+      <div class="desc">仅 1/4——比 DUOL 更保守，因为 SBC 稀释和 GAAP 亏损增加了不确定性</div>
+    </div>
+    <div class="stage">
+      <div class="lbl">第 2 批 · Q2 财报后</div>
+      <div class="px-tag">8 月 · 1/4 仓</div>
+      <div class="desc">需观察：DAU 环比是否如管理层预期下降但<em>不超预期</em>，国际化保持强劲</div>
+    </div>
+    <div class="stage">
+      <div class="lbl">第 3 批 · Q3 财报后</div>
+      <div class="px-tag">11 月 · 1/2 仓</div>
+      <div class="desc">最关键节点：DAU 是否 V 型恢复增长 + bookings 是否回到 +20%——thesis 验证窗口</div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:24px">观测信号清单</h3>
+  <div class="signal green"><div class="dot"></div><strong>加仓信号：</strong>Q3 DAU 同比增长重回 ≥30%（age-gating 后恢复）</div>
+  <div class="signal green"><div class="dot"></div><strong>加仓信号：</strong>FY26 bookings guide 上调或 FY27 guide ≥+18%</div>
+  <div class="signal green"><div class="dot"></div><strong>加仓信号：</strong>广告业务首次单独披露收入（货币化新轴解锁）</div>
+  <div class="signal green"><div class="dot"></div><strong>加仓信号：</strong>SBC 同比下降（费用纪律开始）</div>
+  <div class="signal amber"><div class="dot"></div><strong>持仓不动：</strong>国际市场（日本、印度）保持 +50%+ 增速</div>
+  <div class="signal amber"><div class="dot"></div><strong>持仓不动：</strong>FCF margin 维持 18%+，现金继续累积</div>
+  <div class="signal red"><div class="dot"></div><strong>砍仓 / 退出：</strong>Q3 DAU 仍下降（说明结构性破坏）</div>
+  <div class="signal red"><div class="dot"></div><strong>砍仓 / 退出：</strong>FY27 bookings guide &lt;+12%（增长发动机熄火）</div>
+  <div class="signal red"><div class="dot"></div><strong>砍仓 / 退出：</strong>新一波监管（欧盟/儿童保护）扩大对核心市场打击</div>
+
+  <h3 style="margin-top:24px">仓位建议</h3>
+  <p>建议 RBLX 满仓位约 <strong>1-2%</strong>（vs DUOL 满仓 2-4%）。理由：</p>
+  <ul>
+    <li>RBLX 上行空间更大，但确定性更低（GAAP 亏损 + SBC 稀释）</li>
+    <li>双重监管/合规风险（age-gating 是其一，未来可能有更多）</li>
+    <li>$6.2B 现金提供下行保护，但不能替代经营层面证明</li>
+    <li>Q3 财报是关键<em>事件驱动</em>窗口——值得用一部分仓位等待事件</li>
+  </ul>
+</section>
+
+<!-- ============================ Sources ============================ -->
+<footer>
+  <strong style="color:var(--rblx);font-size:13px;letter-spacing:.08em">来源 / SOURCES</strong>
+  <a href="https://ir.roblox.com/financials/quarterly-results/default.aspx" target="_blank">Roblox Q1 2026 Press Release · Investor Relations</a>
+  <a href="https://www.fool.com/earnings/call-transcripts/2026/04/30/roblox-rblx-q1-2026-earnings-call-transcript/" target="_blank">Q1 2026 Earnings Call Transcript · Motley Fool</a>
+  <a href="https://www.stocktitan.net/sec-filings/RBLX/8-k-roblox-corp-reports-material-event-0de99499c617.html" target="_blank">RBLX 8-K Filing · StockTitan</a>
+  <a href="https://www.benzinga.com/markets/earnings/26/04/52199122/roblox-stock-tanks-after-q1-earnings-report-heres-why" target="_blank">Roblox Stock Tanks After Q1 · Benzinga</a>
+  <a href="https://www.fool.com/coverage/stock-market-today/2026/05/01/stock-market-today-may-1-roblox-shares-plunge-after-cutting-full-year-and-2026-bookings-guidance/" target="_blank">Stock Market Today: Roblox Plunges After Cutting Guidance · Motley Fool</a>
+  <a href="https://massivelyop.com/2026/05/04/roblox-q1-2026-revenues-rise-ahead-of-age-gating-and-short-term-bookings-headwinds-forecast/" target="_blank">Roblox Q1: Age-gating & Short-Term Bookings Headwinds · Massively OP</a>
+  <a href="https://www.gurufocus.com/news/8834493/roblox-rblx-reports-q1-2026-revenue-of-14b-amid-new-safety-measures" target="_blank">RBLX Q1 2026 $1.4B Revenue · GuruFocus</a>
+  <a href="https://stockanalysis.com/stocks/rblx/statistics/" target="_blank">RBLX Statistics & Valuation · StockAnalysis</a>
+
+  <p class="disclaimer">本分析仅为研究备忘，非投资建议。所有估值假设和情景概率反映分析师主观判断。RBLX 的 GAAP 亏损与高 SBC 是估值争议的核心——读者应自行评估对 owner earnings 的判断。数据截至 2026-05-06。</p>
+</footer>
+
+</div>
+
+<!-- ================ CHARTS ================ -->
+<script>
+const baseFont = {family:"-apple-system,BlinkMacSystemFont,sans-serif",size:11};
+const gridColor = "rgba(140,160,200,0.08)";
+const axisColor = "#8aa0c2";
+Chart.defaults.color = axisColor;
+Chart.defaults.font = baseFont;
+
+// Chart 1: Growth components
+new Chart(document.getElementById('growthChart'),{
+  type:'bar',
+  data:{
+    labels:['Q1 DAU','Q1 Bookings','Q1 Hours','Q1 Revenue','Q2 Bookings (guide)','FY26 Bookings (新)','FY26 Bookings (原 guide)'],
+    datasets:[{
+      label:'YoY 增速 (%)',
+      data:[35,43,43,39,10,10,24],
+      backgroundColor:(c)=>{
+        const i = c.dataIndex;
+        if(i<=3) return '#2ecc71';
+        if(i===6) return '#8aa0c2';
+        return '#e74c3c';
+      },
+      borderRadius:4
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.parsed.y+'%'}}},
+    scales:{
+      y:{grid:{color:gridColor},ticks:{callback:v=>v+'%'}},
+      x:{grid:{display:false},ticks:{maxRotation:30}}
+    }
+  }
+});
+
+// Chart 2: Comps scatter
+new Chart(document.getElementById('compsChart'),{
+  type:'scatter',
+  data:{
+    datasets:[
+      {label:'RBLX',data:[{x:10,y:4.3,r:14}],backgroundColor:'#ff5e8a'},
+      {label:'META',data:[{x:12,y:8.5,r:16}],backgroundColor:'#1877f2'},
+      {label:'SNAP',data:[{x:10,y:2.2,r:10}],backgroundColor:'#fffc00'},
+      {label:'PINS',data:[{x:15,y:5.4,r:11}],backgroundColor:'#bd081c'},
+      {label:'TTWO',data:[{x:8,y:4.8,r:11}],backgroundColor:'#f0b950'},
+      {label:'EA',data:[{x:5,y:5.0,r:12}],backgroundColor:'#ff6f00'},
+      {label:'U',data:[{x:8,y:5.0,r:9}],backgroundColor:'#999'},
+      {label:'DUOL',data:[{x:27,y:3.4,r:12}],backgroundColor:'#58a6ff'}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{position:'bottom',labels:{padding:12,boxWidth:10}},
+      tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.x}% growth, ${c.parsed.y}x EV/Sales`}}
+    },
+    scales:{
+      y:{title:{display:true,text:'EV / NTM Revenue (x)'},grid:{color:gridColor},min:0,max:10},
+      x:{title:{display:true,text:'NTM Revenue Growth (%)'},grid:{color:gridColor},min:0,max:30}
+    }
+  }
+});
+
+// Chart: Analyst ratings distribution
+new Chart(document.getElementById('ratingsChart'),{
+  type:'bar',
+  data:{
+    labels:['Strong Buy','Buy','Hold','Sell'],
+    datasets:[{
+      label:'分析师数量',
+      data:[1,14,11,1],
+      backgroundColor:['#1d8c4a','#2ecc71','#f39c12','#e74c3c'],
+      borderRadius:6
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:c=>c.parsed.y+' 家投行'}},
+      title:{display:true,text:'共识：Moderate Buy · 平均目标价 ~$90.40 · 当前 $45.50',color:'#cdd7e8',font:{size:12,weight:'normal'},padding:{bottom:10}}
+    },
+    scales:{
+      y:{grid:{color:gridColor},ticks:{stepSize:2}},
+      x:{grid:{display:false}}
+    }
+  }
+});
+
+// Chart 3: Scenario
+new Chart(document.getElementById('scenarioChart'),{
+  type:'bar',
+  data:{
+    labels:['Bear (35%)','Base (45%)','Bull (20%)','Probability-weighted','Current $45.50'],
+    datasets:[{
+      label:'每股价值 ($)',
+      data:[40,65,110,(40*0.35+65*0.45+110*0.20),45.50],
+      backgroundColor:['#e74c3c','#ff5e8a','#2ecc71','#f0b950','#5a6478'],
+      borderRadius:4
+    }]
+  },
+  options:{
+    indexAxis:'y',responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'$'+c.parsed.x.toFixed(2)}}},
+    scales:{
+      x:{grid:{color:gridColor},ticks:{callback:v=>'$'+v}},
+      y:{grid:{display:false}}
+    }
+  }
+});
+</script>
+</body>
+</html>
