@@ -7,17 +7,23 @@
 
 ---
 
-## 月度维护
+## 周度维护
 
-**自动**：每月 1 号 Claude 会通过 cron schedule 主动 ping 用户做 review。
-配置见 `/Users/json/.claude/` 下 cron 注册项（"monthly-research-stack-review"）。
+**自动**：每月 1/8/15/22/29 号 09:00 CST，Claude 云端 routine 自动跑健康检查。
+- Routine ID: `trig_01C4w4c9of6HVS8AS1rK7MmG`（"weekly-research-stack-review"）
+- 报告输出：`research_reviews/YYYY-MM-DD.md` 直接 commit + push 到 main
+- 你不在电脑前也跑，看 git history 即可
 
 Review 内容：
-- [ ] 工具状态：MCP 是否还在线？trial 是否到期？
-- [ ] URL 有效性：网站是否改版导致 URL 404？
-- [ ] 删掉过去 30 天没用过的源（不让文件膨胀）
-- [ ] 加入新发现（比如这个月用了某个新数据源效果好）
-- [ ] 在 CLAUDE.md 自查一遍：还有没有 "用 X 才能决策得更好" 的隐性焦虑？没有就别加新工具
+- MCP 健康（Bigdata/FMP/Quartr/IBKR 是否在线 + tier 是否 gated）
+- Bigdata trial 状态（初始 trial 起始 2026-05-26）
+- 3 个 URL 抽查（spot check 是否 404）
+- 是否有"新工具焦虑"——按 CLAUDE.md "溶解闸门借口" 原则默认拒绝加新工具
+
+**深度 review**：每季度做一次（季度末）——
+- 完整跑一次 stack 实测
+- 估算这季度 stack 帮你做出多少个决策
+- 如果工具增加但决策质量没改善 → 删工具不加工具
 
 ---
 
