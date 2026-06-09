@@ -7,12 +7,13 @@
 
 ---
 
-## 周度维护
+## 双周维护
 
-**自动**：每月 1/8/15/22/29 号 09:00 CST，Claude 云端 routine 自动跑健康检查。
-- Routine ID: `trig_01C4w4c9of6HVS8AS1rK7MmG`（"weekly-research-stack-review"）
+**自动准备材料 → 你来 review**：每月 1 号 + 16 号 09:00 CST，Claude 云端 routine 跑健康检查并 commit 报告。
+- Routine ID: `trig_01C4w4c9of6HVS8AS1rK7MmG`（"biweekly-research-stack-review"）
 - 报告输出：`research_reviews/YYYY-MM-DD.md` 直接 commit + push 到 main
 - 你不在电脑前也跑，看 git history 即可
+- **routine 不会修改 research_urls.md 或 CLAUDE.md**——它只是提醒+检查，决策权在你
 
 Review 内容：
 - MCP 健康（Bigdata/FMP/Quartr/IBKR 是否在线 + tier 是否 gated）
