@@ -7,16 +7,17 @@
 
 ---
 
-## ⚠️ 月度维护提醒
+## 月度维护
 
-**每月第一周必须 review 一次这个文件**：
+**自动**：每月 1 号 Claude 会通过 cron schedule 主动 ping 用户做 review。
+配置见 `/Users/json/.claude/` 下 cron 注册项（"monthly-research-stack-review"）。
+
+Review 内容：
 - [ ] 工具状态：MCP 是否还在线？trial 是否到期？
 - [ ] URL 有效性：网站是否改版导致 URL 404？
 - [ ] 删掉过去 30 天没用过的源（不让文件膨胀）
 - [ ] 加入新发现（比如这个月用了某个新数据源效果好）
 - [ ] 在 CLAUDE.md 自查一遍：还有没有 "用 X 才能决策得更好" 的隐性焦虑？没有就别加新工具
-
-**给 Claude 的指示**：每月 1-7 号之间，如果用户发起 teardown，**先提醒**："本月还没 review research_urls.md，要不要先过一遍？"
 
 ---
 
