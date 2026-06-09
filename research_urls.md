@@ -7,6 +7,19 @@
 
 ---
 
+## ⚠️ 月度维护提醒
+
+**每月第一周必须 review 一次这个文件**：
+- [ ] 工具状态：MCP 是否还在线？trial 是否到期？
+- [ ] URL 有效性：网站是否改版导致 URL 404？
+- [ ] 删掉过去 30 天没用过的源（不让文件膨胀）
+- [ ] 加入新发现（比如这个月用了某个新数据源效果好）
+- [ ] 在 CLAUDE.md 自查一遍：还有没有 "用 X 才能决策得更好" 的隐性焦虑？没有就别加新工具
+
+**给 Claude 的指示**：每月 1-7 号之间，如果用户发起 teardown，**先提醒**："本月还没 review research_urls.md，要不要先过一遍？"
+
+---
+
 ## 一、原始 SEC 文件（最权威）→ EdgarTools MCP
 
 不用 URL——我直接调用 MCP：
@@ -27,9 +40,24 @@
 
 ---
 
-## 二、实时市场数据（价、市值、ratios）→ WebFetch
+## 二、实时市场数据（价、市值、ratios）
 
-### 主选：stockanalysis.com
+### 主选：IBKR MCP（你账户实时数据 = 你交易的价）
+
+| 我调用 | 给我什么 |
+|---|---|
+| `get_price_snapshot(ticker)` | 实时价 + bid/ask + 当日变动（**你账户 entitlement 内免费**）|
+| `get_price_history(ticker, period)` | 历史价（日/周/月，多年）|
+| `search_contracts(ticker)` | 找到合约（多 listing 时用）|
+
+**为什么首选 IBKR**：
+- 数据 = 你**实际交易**的价格，没有第三方 mismatch
+- 不依赖第三方 URL，不会因网站改版 break
+- 实时（Level 1 US 股票免费）
+
+### 备选：WebFetch（IBKR 不在线 或 非美股标的）
+
+#### stockanalysis.com
 | URL 模板 | 给我什么 |
 |---|---|
 | `https://stockanalysis.com/stocks/{ticker}/` | 概览 + 实时价 + 简要财务 |
@@ -140,8 +168,9 @@ trial 在 ~13 天后退化到 Free（功能受限）。期间用作：
 
 ```
 1. 锚定（30 秒）
-   - WebFetch stockanalysis.com/stocks/{ticker}/statistics/
-   - WebFetch stockanalysis.com/stocks/{ticker}/forecast/
+   - get_price_snapshot({ticker})  # IBKR 实时价（首选）
+   - WebFetch stockanalysis.com/stocks/{ticker}/statistics/  # 拿 P/E、市值、52w
+   - WebFetch stockanalysis.com/stocks/{ticker}/forecast/   # 拿共识目标
    → 拿到：现价、P/E、市值、52w、共识目标
 
 2. 业务理解（5 分钟）
@@ -177,7 +206,10 @@ trial 在 ~13 天后退化到 Free（功能受限）。期间用作：
 
 ## 维护
 
-这个文件**不固定**——遇到新的好 URL 或工具就加进来。每季度回顾一次：
-- 删掉没用过的源
-- 加入新发现
-- 检查所有 URL 是否还有效（产品改版会 break URL）
+见**文件顶部"月度维护提醒"**——每月第一周必过。
+
+每季度再做一次**深度 review**：
+- 完整跑一次 stack 实测（用某个 ticker）
+- 估算这季度 stack 帮你做出多少个决策
+- 如果 < 1 次决策/季度 → 考虑工具是否过度
+- 如果发现工具增加但决策质量没改善 → 删工具不加工具
